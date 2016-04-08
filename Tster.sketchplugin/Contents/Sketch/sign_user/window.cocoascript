@@ -1,0 +1,158 @@
+var Window = {
+  "loginInterface" : function(context){
+    var app = [NSApplication sharedApplication]
+    var loginWindow = [[NSWindow alloc] init]
+    [loginWindow setFrame:NSMakeRect(0, 0, 540, 330) display:false]
+    [loginWindow setBackgroundColor:NSColor.whiteColor()]
+
+    var plugin = context.plugin
+
+    if(Library.util.isRetinaDisplay()){
+        var imageFilePath = [plugin urlForResourceNamed:"icons/ic_logo@2x.png"];
+    } else {
+        var imageFilePath = [plugin urlForResourceNamed:"icons/ic_logo.png"];
+    }
+
+    var imageData = [NSData dataWithContentsOfURL:imageFilePath];
+    var image = NSImage.alloc().initWithData(imageData);
+
+    var imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(165, 230, 200, 56)];
+    [imageView setImage:image];
+    [[loginWindow contentView] addSubview:imageView];
+
+    var emailInputField = [[NSTextField alloc] initWithFrame:NSMakeRect(150, 170, 240, 25)]
+    [[emailInputField cell] setPlaceholderString:"Email"]
+    [[loginWindow contentView] addSubview:emailInputField]  
+      
+    var passwordField = [[NSSecureTextField alloc] initWithFrame:NSMakeRect(150, 135, 240, 25)]
+    [[passwordField cell] setPlaceholderString:"Password"]
+    [[loginWindow contentView] addSubview:passwordField]
+
+    var loginButton = [[NSButton alloc] initWithFrame:NSMakeRect(305, 85, 90, 46)]
+    var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(220, 85, 90, 46)]
+
+    [loginButton setTitle:"Log In"]
+    [loginButton setBezelStyle:NSRoundedBezelStyle]
+    [loginButton setKeyEquivalent:"\r"]
+    [loginButton setCOSJSTargetFunction:function(sender) {
+        var email = emailInputField.stringValue()
+        var password = passwordField.stringValue()
+
+        userLogin.loginWithUsernameAndPassword(email, password, context, function(is_logged){
+            if (is_logged) {
+                [loginWindow orderOut:nil]
+                [app stopModal]
+
+                [cancelButton setCOSJSTargetFunction:undefined]
+                [loginButton setCOSJSTargetFunction:undefined]
+                [getAppButton setCOSJSTargetFunction:undefined]    
+            } else {
+                passwordField.stringValue = ""
+            }
+        });
+    }];
+
+    [loginButton setAction:"callAction:"]
+    [[loginWindow contentView] addSubview:loginButton]
+
+    [cancelButton setTitle:"Cancel"]
+    [cancelButton setBezelStyle:NSRoundedBezelStyle]
+    [cancelButton setCOSJSTargetFunction:function(sender) {
+        [loginWindow orderOut:nil]
+        [app stopModal]
+        [cancelButton setCOSJSTargetFunction:undefined]
+        [loginButton setCOSJSTargetFunction:undefined]
+        [getAppButton setCOSJSTargetFunction:undefined]
+    }];
+    [cancelButton setAction:"callAction:"]
+    [[loginWindow contentView] addSubview:cancelButton]
+
+    var bottomActionsView = [[NSView alloc] initWithFrame:NSMakeRect(150, 65, 240, 1)]
+    bottomActionsView.setWantsLayer(true)
+    [[loginWindow contentView] addSubview:bottomActionsView]  
+      
+    var borderLayer = [CALayer layer]
+    borderLayer.frame = CGRectMake(0, 1, 240, 1)
+    [borderLayer setBackgroundColor:CGColorCreateGenericRGB(220/255, 220/255, 220/255, 1.0)]
+    [bottomActionsView setLayer:borderLayer]
+
+    var getAppButton = [[NSButton alloc] initWithFrame:NSMakeRect(145, 15, 95, 46)]
+
+    [getAppButton setTitle:"Get the app"]
+    [getAppButton setBezelStyle:NSRoundedBezelStyle]
+    [getAppButton setCOSJSTargetFunction:function(sender) {
+        var url = [NSURL URLWithString:@"https://itunes.apple.com/br/app/tster-wireframe-mockup-prototyping/id964176660"];
+
+        [[NSWorkspace sharedWorkspace] openURL:url];
+    }];
+    [getAppButton setAction:"callAction:"]
+    [[loginWindow contentView] addSubview:getAppButton]
+
+    var signatureField = [[NSTextField alloc] initWithFrame:NSMakeRect(315, 31, 90, 17)]
+    [signatureField setEditable:false]
+    [signatureField setBordered:false]
+    [signatureField setDrawsBackground:false]
+    [signatureField setFont:[NSFont systemFontOfSize:12]]
+    [signatureField setStringValue:"tsterapp.com"]
+    [signatureField setTextColor:[NSColor colorWithCalibratedRed:(112/255) green:(112/255) blue:(120/255) alpha:1]]
+    [[loginWindow contentView] addSubview:signatureField]
+
+    [app runModalForWindow:loginWindow]
+  },
+  "logoutInterface" : function(context) {
+    var app = [NSApplication sharedApplication]
+    var alreadyLoggedInWindow = [[NSWindow alloc] init]
+    [alreadyLoggedInWindow setFrame:NSMakeRect(0, 0, 540, 330) display:false]
+    [alreadyLoggedInWindow setBackgroundColor:NSColor.whiteColor()]
+    
+    var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 179, 540, 17)]
+    [titleField setEditable:false]
+    [titleField setBordered:false]
+    [titleField setAlignment:2] 
+    [titleField setDrawsBackground:false]
+    [titleField setFont:[NSFont boldSystemFontOfSize:13]];
+    [titleField setStringValue:"You are already logged in!"]
+    [[alreadyLoggedInWindow contentView] addSubview:titleField]
+    
+    var subtitleField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 140, 540, 30)]
+    [subtitleField setEditable:false]
+    [subtitleField setBordered:false]
+    [subtitleField setAlignment:2] 
+    [subtitleField setFont:[NSFont systemFontOfSize:13]];
+    [subtitleField setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]];
+    [subtitleField setDrawsBackground:false]
+    [subtitleField setStringValue:"To get access with a different account you have to logout."]
+    [[alreadyLoggedInWindow contentView] addSubview:subtitleField]
+
+    var logoutButton = [[NSButton alloc] initWithFrame:NSMakeRect(267, 100, 92, 46)]
+    var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(181, 100, 92, 46)]
+
+    [logoutButton setTitle:"Log Out"]
+    [logoutButton setBezelStyle:NSRoundedBezelStyle]
+    [logoutButton setCOSJSTargetFunction:function(sender) {
+        userLogout.logout()
+        [alreadyLoggedInWindow orderOut:nil]
+        [app stopModal]
+        [logoutButton setCOSJSTargetFunction:undefined]
+        [cancelButton setCOSJSTargetFunction:undefined]
+        Window.loginInterface(context);
+    }];
+    [logoutButton setAction:"callAction:"]
+    [[alreadyLoggedInWindow contentView] addSubview:logoutButton]
+    
+    [cancelButton setTitle:"Cancel"]
+    [cancelButton setBezelStyle:NSRoundedBezelStyle]
+    [cancelButton setCOSJSTargetFunction:function(sender) {
+        [alreadyLoggedInWindow orderOut:nil]
+        [app stopModal]
+        [logoutButton setCOSJSTargetFunction:undefined]
+        [cancelButton setCOSJSTargetFunction:undefined]
+    }];
+    [cancelButton setAction:"callAction:"]
+    [[alreadyLoggedInWindow contentView] addSubview:cancelButton]
+
+    [alreadyLoggedInWindow setDefaultButtonCell:[logoutButton cell]];
+    
+    [app runModalForWindow:alreadyLoggedInWindow]
+  }
+}

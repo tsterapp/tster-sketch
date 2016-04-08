@@ -1,0 +1,127 @@
+var TabBar = {
+  tabbars : [],
+  tabbar_height: 50,
+  "addTabBar" : function(tabbar, artboard){
+    var group = Library.addLayerGroup(artboard, {"name" : "Tab Bar"}),
+        is_label = tabbar["isLabel"] ? tabbar["isLabel"].boolValue() : 0;
+
+    var rect = [group rect];
+    rect.size.height = 50;
+    rect.size.width = General.artboard_width;
+    rect.origin.y = General.artboard_height - this.tabbar_height;
+    [group setRect:rect];
+
+    var bar = this.buildBar(group);
+    var barColor = Styles.util.findObjectInArrayWithTitle(tabbar["colors"], "Bar Color");
+    var barStyle = Styles.tabbar.barColor(barColor["color"]);
+    bar.setStyle(barStyle.newInstance());
+
+    var textColor = Styles.util.findObjectInArrayWithTitle(tabbar["colors"], "Icons Unselected Color");
+    var textStyle = Styles.tabbar.iconsColor(textColor["color"]);
+
+    for (var i = 0; i < tabbar.itens.count(); i++) {
+      var item = tabbar.itens[i],
+          item_group = Library.addLayerGroup(group, {"name" : "Item " + (i + 1)}),
+          item_width = (General.artboard_width / tabbar.itens.count()),
+          item_offset_x = i * item_width,
+          rect_group = [item_group rect];
+
+      rect_group.size.width = item_width;
+      rect_group.size.height = this.tabbar_height;
+      rect_group.origin.x = item_offset_x;
+      rect_group.origin.y = 0;
+
+      [item_group setRect:rect_group];
+
+      if (Library.util.checkIfNull(item["icon"]) && item["icon"] != "bgcustomicontab") {
+        var icon = this.addIcon(item_group, item);
+        icon[0].setFontPostscriptName(icon[1].font);
+        icon[0].setFontSize(22);
+        icon[0].setTextColor(Library.util.colorFromString(textColor["color"]));
+
+        this.repositionIcon(icon[0], bar, is_label, i, tabbar.itens.count());
+      }
+
+      if (is_label) {
+        var text = this.addText(item_group, item);
+        text.setStyle(textStyle.newInstance());
+
+        this.repositionText(text, bar, is_label, i, tabbar.itens.count());
+      }
+    }
+
+    Styles.tabbars(tabbar["id"], group);
+  },
+  "buildBar" : function(container){
+    var rect = NSMakeRect(0, 0, General.artboard_width, this.tabbar_height),
+        params = {
+          "name": "Bar",
+          rect: rect
+        };
+
+    var layer = Library.addLayer(container, "rectangle", params);
+
+    return layer;
+  },
+  "addIcon" : function(container, object){
+    var created_icon = Icons.createIcon(object["icon"]);
+    var textLayer = Library.addTextLayer(container, {"text": created_icon.icon, "name": created_icon.icon_name});
+
+    return [textLayer, created_icon];
+  },
+  "addText" : function(container, object){
+    var text_name = object["title"];
+    var textLayer = Library.addTextLayer(container, {"text": text_name, "name": text_name, "fontSize": 10});
+
+    return textLayer;
+  },
+  "addImage" : function(container, object){
+    var source = General.plugin.urlForResourceNamed("icons_tabbar/"+ object["icon"] +"@2x.png"),
+        layer = Library.addImageLayer(container, General.page, {url: source, name: object["icon"]}, true);
+
+    return layer;
+  },
+  "repositionIcon" : function(layer, group, is_label, index, length_itens){
+    var rect = [layer rect],
+        rect_group = [group rect],
+        distance_to_bottom = is_label ? 7 : 0,
+        item_width = (General.artboard_width / length_itens);
+
+    rect.origin.y = ((CGRectGetHeight(rect_group) / 2) - (CGRectGetHeight(rect) / 2)) - distance_to_bottom;
+    rect.origin.x = ((item_width / 2) - (CGRectGetWidth(rect) / 2));
+
+    [layer setRect:rect];
+  },
+  "repositionText" : function(layer, group, is_label, index, length_itens){
+    var rect = [layer rect],
+        rect_group = [group rect],
+        item_width = (General.artboard_width / length_itens);
+
+    rect.origin.y = (CGRectGetHeight(rect_group) / 2) + 8;
+    rect.origin.x = ((item_width / 2) - (CGRectGetWidth(rect) / 2));
+
+    [layer setRect:rect];
+  },
+  "findTabBar" : function(idTabBar){
+    var tabbar = [[NSObject alloc] init];
+    tabbar["itens"] = [];
+
+    for (var i = 0; i < this.tabbars.count(); i++) {
+      if (this.tabbars[i]["_id"].isEqualToString(idTabBar)) {
+        tabbar = this.tabbars[i];
+      }
+    }
+    return tabbar;
+  },
+  "fallbackColors" : function(object) {
+    if (object["colors"] == null) {
+      var mutable_object = [NSMutableDictionary dictionaryWithDictionary:object];
+      mutable_object["colors"] = [{"title": "Icons Unselected Color", "color": "0.584314 0.584314 0.584314 1"},
+                    {"title": "Icons Selected Color", "color": "0.160784 0.47451 1 1"},
+                    {"title": "Bar Color", "color": "0.960784 0.960784 0.960784 1"}];                   
+      return mutable_object.copy();
+    } else {
+      return object;
+    }
+  }
+};

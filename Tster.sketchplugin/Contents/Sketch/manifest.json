@@ -1,0 +1,39 @@
+{
+  "name" : "Tster",
+  "description" : "Its a client plugin to use Tster Project in Sketch for developers and designers.",
+  "version" : "1.0.0",
+  "commands" : [
+    {
+      "script" : "sign_user.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "cmd ctrl l",
+      "name" : "Login to Tster",
+      "identifier" : "sign_user"
+    },
+    {
+      "script" : "import_projects.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "cmd ctrl i",
+      "name" : "Import Artboards",
+      "identifier" : "import_projects"
+    },
+    {
+      "script" : "report_issue.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "cmd ctrl r",
+      "name" : "Report an Issue",
+      "identifier" : "report_issue"
+    }
+  ],
+  "menu": {
+    "title" : "Tster",
+    "items": [
+      "sign_user",
+      "import_projects",
+      "report_issue"
+    ]
+  },
+  "identifier" : "com.tster.sketch",
+  "author" : "Caio Biodere",
+  "authorEmail" : "caiobiodere@gmail.com"
+}

@@ -1,0 +1,12 @@
+var Keyboard = {
+  "addKeyboard" : function(artboard){
+    var keyboard = Library.util.imageKeyboardFromMobile(General.mobile),
+        source = General.plugin.urlForResourceNamed("icons_keyboard/"+ keyboard +"@2x.png"),
+        layer = Library.addImageLayer(artboard, General.page, {url: source, name: keyboard}, false),
+        rect = [layer rect];
+
+    rect.origin.y = General.artboard_height - CGRectGetHeight(rect);
+
+    [layer setRect:rect];
+  }
+};

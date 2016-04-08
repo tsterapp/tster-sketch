@@ -1,0 +1,87 @@
+var Segmented = {
+  segmenteds : [],
+  "addSegmented" : function(container, geometric, idSegmented){
+    var group = Library.addLayerGroup(container, {"name" : "Segmented"}),
+        segmented = this.find(idSegmented),
+        is_text = segmented["isText"],
+        number_of_itens = segmented["numberOfItens"],
+        color = Library.util.colorFromString(segmented["color"]),
+        itens = segmented["itens"],
+        item_width = 60,
+        item_height = 30;
+
+    for (var i = 0; i < number_of_itens; i++) {
+      var object = itens[i],
+          parameters = {rect: CGRectMake(i * item_width - (i != 0 ? i * 1 : 0), (geometric["height"] / 2) - (item_height / 2), item_width, item_height), colorBorder : color, borderThickness: 1};
+
+      if (number_of_itens == 1 && i == 0) {
+        parameters["cornerComponents"] = "4/4/4/4";
+      } else if (i == 0) {
+        parameters["cornerComponents"] = "4/0/0/4";
+      } else if (i == number_of_itens - 1) {
+        parameters["cornerComponents"] = "0/4/4/0";
+      }
+
+      var group_item = Library.addLayerGroup(group, {"name" : "Item " + (i + 1)}),
+          layer = this.buildItem(group_item, parameters);
+      
+      group_item.resizeToFitChildrenWithOption(0);
+
+      var centerX = parameters.rect.size.width / 2;
+      var centerY = parameters.rect.size.height / 2;
+
+      if ([is_text boolValue]) {
+        var label = this.addLabel(group_item, object);
+        
+        label.setTextColor(Library.util.colorFromString(segmented["color"]));
+
+        Library.util.centerLayer(label, CGPointMake(centerX, centerY));
+      } else {
+        var icon = this.addIcon(group_item, object);
+
+        icon[0].setFontPostscriptName(icon[1].font);
+        icon[0].setFontSize(26);
+        icon[0].setTextColor(Library.util.colorFromString(segmented["color"]));
+
+        Library.util.centerLayer(icon[0], CGPointMake(centerX, centerY));
+      }
+    };
+
+    group.resizeToFitChildrenWithOption(0);
+
+    var centerX = geometric["x"] + (geometric["width"] / 2);
+    var centerY = geometric["y"] + (geometric["height"] / 2);
+
+    Library.util.centerLayer(group, CGPointMake(centerX, centerY));
+  },
+  "buildItem" : function(group, parameters) {
+    return Library.addRectangle(group, parameters);
+  },
+  "addLabel" : function(group, object) {
+    var text_name = object["title"];
+    var textLayer = Library.addTextLayer(group, {"text": text_name, "name": text_name, "fontSize": 13});
+
+    return textLayer;
+  },
+  "addIcon" : function(group, object) {
+    var created_icon = Icons.createIcon(object["icon"]);
+    var textLayer = Library.addTextLayer(group, {"text": created_icon.icon, "name": created_icon.icon_name});
+
+    return [textLayer, created_icon];
+  },
+  "find" : function(id){
+    var segmented = [[NSObject alloc] init];
+    segmented["itens"] = [NSArray arrayWithObject:""];
+    segmented["numberOfItens"] = 0;
+    segmented["isText"] = 0;
+    segmented["color"] = "";
+
+    for (var i = 0; i < this.segmenteds.count(); i++) {
+      if (this.segmenteds[i]["_id"].isEqualToString(id)) {
+        segmented = this.segmenteds[i];
+      }
+    }
+
+    return segmented;
+  }
+}

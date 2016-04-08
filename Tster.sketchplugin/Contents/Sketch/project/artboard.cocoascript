@@ -1,0 +1,32 @@
+var Artboard = {
+  "createArtboard" : function(rect, page_object){
+    var artboard = Library.addArtboard(rect, { name : page_object["nome"]});
+
+    if (Library.util.checkIfNull(page_object["objetosGeometricos"])) {
+      Draw.addGeometrics(artboard, artboard, [NSArray arrayWithArray:page_object["objetosGeometricos"]]);
+    };
+
+    if (Library.util.checkIfNull(page_object["idTabBar"])) {
+      var idTabBar = page_object["idTabBar"];
+      var tabbar = TabBar.findTabBar(idTabBar);
+      tabbar = TabBar.fallbackColors(tabbar);
+        
+      Styles.tabbar.colors(tabbar["colors"]);
+      TabBar.addTabBar(tabbar, artboard);
+    };
+
+    if (Library.util.checkIfNull(page_object["objetosNavBar"])) {
+      var object = page_object["objetosNavBar"];
+      object = NavBar.fallbackColors(object);
+      
+      Styles.navbar.colors(object["colors"]);
+      NavBar.addNavBar(object, artboard);
+    };
+
+    if (Library.util.checkIfNull(page_object["isKeyboard"])) {
+      Keyboard.addKeyboard(artboard);
+    };
+
+    return artboard;
+  }
+}

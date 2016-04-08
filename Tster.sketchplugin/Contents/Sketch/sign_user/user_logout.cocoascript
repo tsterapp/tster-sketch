@@ -1,0 +1,7 @@
+var userLogout = {
+  "logout" : function () {
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey:"user"];
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey:"token"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+}

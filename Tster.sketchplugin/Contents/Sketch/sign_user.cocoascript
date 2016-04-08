@@ -1,0 +1,16 @@
+@import "helpers/library.cocoascript";
+@import "sign_user/user_login.cocoascript";
+@import "sign_user/user_logout.cocoascript";
+@import "sign_user/window.cocoascript";
+
+var onRun = function(context) {
+  var doc = context.document;       // the current document (MSDocument)
+  var plugin = context.plugin;      // the plugin (MSPluginBundle)
+  var user = [[NSUserDefaults standardUserDefaults] objectForKey:"user"];
+
+  if (user != nil) {
+    Window.logoutInterface(context);
+  } else {
+    Window.loginInterface(context);
+  }
+} 

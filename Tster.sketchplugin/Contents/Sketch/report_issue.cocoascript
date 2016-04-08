@@ -1,0 +1,6 @@
+@import "helpers/manifest.cocoascript";
+@import "report/window.cocoascript";
+
+var onRun = function(context) {
+  Window.supportInterface(context);
+};

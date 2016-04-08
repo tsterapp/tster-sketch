@@ -1,0 +1,24 @@
+var Icons = {
+  "createIcon" : function(icon_name) {
+    var icon = [[NSObject alloc] init];
+    var finded_icon = [[NSObject alloc] init];
+    var unicode_icon = "";
+    var font = "";
+
+    if (icon_name.rangeOfString('fa-').location == 0) {
+      finded_icon = Library.searchAlias(icon_name.replace("fa-", ""), General.icons_awesome);
+      unicode_icon = Library.escapeUnicode('\\u' + finded_icon.unicode);
+      font = "FontAwesome";
+    } else if (icon_name.rangeOfString('ion-').location == 0){
+      finded_icon = Library.searchAlias(icon_name, General.icons_ionic);
+      unicode_icon = Library.escapeUnicode(finded_icon.unicode);
+      font = "Ionicons";
+    } else {
+      finded_icon = Library.searchAlias(icon_name, General.icons_material);
+      unicode_icon = Library.escapeUnicode(finded_icon.unicode);
+      font = "Material-Design-Iconic-Font";
+    }
+
+    return {"font": font, "icon": unicode_icon, "icon_name" : finded_icon.alias};
+  }
+}

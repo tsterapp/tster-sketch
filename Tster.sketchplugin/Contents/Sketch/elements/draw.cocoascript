@@ -1,0 +1,158 @@
+var Draw = {
+  "addGeometrics": function (artboard, group, geometrics) {
+    for (var i = 0; i < geometrics.count(); i++) {
+      var geometric = geometrics[i];
+      var rect = NSMakeRect(geometric.x, geometric.y, geometric.width, geometric.height);
+
+      if (geometric.type == 0) {
+        this.addLayerOfRectDraw(group, rect, geometric);
+      } else if (geometric.type == 3) {
+        this.addTextOfRectDraw(group, rect, geometric.label, {})
+      } else if (geometric.type == 4) {
+        this.addIconOfRectDraw(group, rect, geometric.image, {});
+      } else if (geometric.type == 5) {
+        Table.addTable(group, geometric, geometric.idTable);
+      } else if (geometric.type == 6) {
+        this.addSwitchOfRectDraw(group, rect);
+      } else if (geometric.type == 7) {
+        this.addSliderOfRectDraw(group, rect);
+      } else if (geometric.type == 8) {
+        Picker.addPicker(group, geometric, geometric.idPicker);
+      } else if (geometric.type == 9) {
+        this.addPlaceholderOfRectDraw(group, rect);
+      } else if (geometric.type == 10) {
+        this.addImageOfRectDraw(group, rect, geometric);
+      } else if (geometric.type == 11) {
+        Segmented.addSegmented(group, geometric, geometric.idSegmented);
+      } else if (geometric.type == 12) {
+        ActionSheet.addActionSheet(group, geometric, geometric.idActionSheet);
+      } else if (geometric.type == 13) {
+        AlertView.addAlertView(group, geometric, geometric.idAlertView);
+      }
+    }
+    
+    group.resizeToFitChildrenWithOption(0);
+  },
+  "addTextOfRectDraw": function(group, rect, text_object, parameters){
+    var text_name = text_object.text;
+    var textLayer = Library.addTextLayer(group, {"text": text_name, "rect": MSRect.rectWithRect(rect), "frame": MSRect.rectWithRect(rect), "name": text_name.alias, "fontSize": text_object.size});
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+
+    var textFrame = [textLayer frame];
+    [textFrame setWidth: rect.size.width];
+    [textFrame setHeight: rect.size.height];
+
+    Library.util.centerLayer(textLayer, CGPointMake(rect.origin.x + (rect.size.width / 2), rect.origin.y + (rect.size.height / 2)));
+
+    if (text_object["fontColor"]) {
+      [textLayer setTextColor:Library.util.colorFromString(text_object["fontColor"])];  
+    };
+    
+    if (text_object["alignment"]) {
+      [textLayer setTextAlignment:Library.util.alignFromValue(text_object["alignment"])];  
+    };
+    
+    if (text_object["fontName"]) {
+      [textLayer setFontPostscriptName:Library.util.fontFromString(text_object["fontName"])];
+    };
+
+    return textLayer;
+  },
+  "addIconOfRectDraw": function(group, rect, image_object, parameters){
+    var created_icon = Icons.createIcon(image_object.name);
+    var textLayer = Library.addTextLayer(group, {"text": created_icon.icon, "name": created_icon.icon_name, "fontSize": image_object["size"]});
+
+    Library.util.centerLayer(textLayer, CGPointMake(rect.origin.x + (rect.size.width / 2), rect.origin.y + (rect.size.height / 2)))
+    textLayer.setFontPostscriptName(created_icon.font);
+
+    Library.util.centerLayer(textLayer, CGPointMake(rect.origin.x + (rect.size.width / 2), rect.origin.y + (rect.size.height / 2)));
+
+    if (image_object["fontColor"]) {
+      [textLayer setTextColor:Library.util.colorFromString(image_object["fontColor"])];  
+    };
+
+    return textLayer;
+  },
+  "addLayerOfRectDraw": function(group, rect, geometric){
+    var colorFill = Library.util.colorFromString(geometric["colorFill"]);
+    var colorBorder = Library.util.colorFromString(geometric["colorBorder"]);
+    var sizeBorder = parseFloat(geometric["sizeBorder"]);
+    var alpha = geometric["alpha"];
+    
+    var parameters = {rect: rect, alpha: alpha, color: colorFill, colorBorder: colorBorder, borderThickness: sizeBorder, radius : geometric["percentage"]};
+    var layer;
+
+    if (geometric["label"]["text"] && geometric["label"]["text"] != "") {
+      parameters = {rect: CGRectMake(0, 0, rect.size.width, rect.size.height), color: colorFill, colorBorder: colorBorder, borderThickness: sizeBorder, radius : geometric["percentage"]};
+      layer = Library.addLayerGroup(group, {"name" : "Draw Text", "rect" : rect});
+
+      var text_object = geometric["label"];
+      var rectLayer = Library.addRectangle(layer, parameters);
+      var textLayer = Library.addTextLayer(layer, {"text": text_object["text"], "rect": parameters.rect, "name": text_object["text"], "fontSize": text_object["size"]});
+
+      if (text_object["fontColor"]) {
+        [textLayer setTextColor:Library.util.colorFromString(text_object["fontColor"])];  
+      };
+
+      if (text_object["fontName"]) {
+        [textLayer setFontPostscriptName:Library.util.fontFromString(text_object["fontName"])];
+      };
+
+      Library.util.centerLayer(textLayer, CGPointMake(rect.size.width / 2, rect.size.height / 2));
+    } else {
+      layer = Library.addRectangle(group, parameters);
+    }
+
+    return layer;
+  },
+  "addSwitchOfRectDraw": function(group, rect){
+    Switch.addSwitch(group, rect);
+  },
+  "addSliderOfRectDraw": function(group, rect) {
+    Slider.addSlider(group, rect);
+  },
+  "addPlaceholderOfRectDraw": function(group, rect) {
+    var spaceLine = 5.0;
+    var group = Library.addLayerGroup(group, {"name" : "Draw Placeholder", "rect" : rect});
+    var rectLayer = Library.addRectangle(group, {"rect": NSMakeRect(0, 0, rect.size.width, rect.size.height), "color": MSColor.colorWithSVGString("#EBEBEB")});
+
+    var path = NSBezierPath.bezierPath();
+    path.moveToPoint(NSMakePoint(spaceLine, spaceLine));
+    path.lineToPoint(NSMakePoint(rect.size.width - spaceLine, rect.size.height - spaceLine));
+    path.closePath();
+
+    var shape = MSShapeGroup.shapeWithBezierPath(path);
+    var border = [[[shape style] borders] addNewStylePart];
+    [border setColor:MSColor.colorWithSVGString("#FFFFFF")];
+    [border setThickness:1];
+    [border setPosition:0];
+    group.addLayers([shape]);
+
+    var path = NSBezierPath.bezierPath();
+    path.moveToPoint(NSMakePoint(rect.size.width - spaceLine, spaceLine));
+    path.lineToPoint(NSMakePoint(spaceLine, rect.size.height - spaceLine));
+    path.closePath();
+
+    var shape = MSShapeGroup.shapeWithBezierPath(path);
+    var border = [[[shape style] borders] addNewStylePart];
+    [border setColor:MSColor.colorWithSVGString("#FFFFFF")];
+    [border setThickness:1];
+    [border setPosition:0];
+    group.addLayers([shape]);
+  },
+  "addImageOfRectDraw": function(group, rect, geometric) {
+    var layer = Library.addRectangle(group, {"rect": rect, radius : geometric["percentage"]});
+    var uploadKey = geometric["uploadKey"];
+    
+    if (!uploadKey.isEqualToString("")) {
+      var image = Library.getImageWithUrl(uploadKey);
+      var fill = layer.style().fills().addNewStylePart();
+
+      fill.setFillType(4);
+      fill.setPatternImage(image);
+      fill.setPatternFillType(1);
+    };
+  }
+}

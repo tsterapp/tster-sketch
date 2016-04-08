@@ -1,0 +1,51 @@
+@import "helpers/library.cocoascript";
+@import "helpers/general.cocoascript";
+@import "helpers/styles.cocoascript";
+@import "helpers/icons.cocoascript";
+@import "helpers/manifest.cocoascript";
+
+@import "elements/table.cocoascript";
+@import "elements/draw.cocoascript";
+@import "elements/navbar.cocoascript";
+@import "elements/tabbar.cocoascript";
+@import "elements/keyboard.cocoascript";
+@import "elements/switch.cocoascript";
+@import "elements/slider.cocoascript";
+@import "elements/picker.cocoascript";
+@import "elements/actionsheet.cocoascript";
+@import "elements/segmented.cocoascript";
+@import "elements/alertview.cocoascript";
+
+@import "updates/updates.cocoascript";
+
+@import "project/artboards.cocoascript";
+@import "project/artboard.cocoascript";
+@import "project/window.cocoascript";
+
+var onRun = function(context) {
+
+  Updates.isNewUpdate(context, function(is_new_update) {
+    if (is_new_update) {
+      var alert = [[NSAlert alloc] init]
+      [alert setMessageText:"A new version is available!"]
+      [alert setInformativeText:"Tster Sketch Plugin is now available. Would you like to download it now? You can have problems by not updating the plugin."]
+      [alert addButtonWithTitle:"Remind Me Later"]
+      [alert addButtonWithTitle:"Download Update"]
+
+      var responseCode = [alert runModal];
+
+      if(responseCode == "1001"){
+        var url = [NSURL URLWithString:@"https://github.com/tsterapp/tster-sketch"];
+        [[NSWorkspace sharedWorkspace] openURL:url];
+      }
+    } else {
+      var token = [[NSUserDefaults standardUserDefaults] objectForKey:"token"];
+
+      if (token != nil) {
+        Window.artboardsInterface(context);
+      } else {
+        [[NSApplication sharedApplication] displayDialog:"You not logged in Tsterapp." withTitle:"Login error."];
+      }
+    }
+  });  
+};

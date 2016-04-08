@@ -1,0 +1,39 @@
+var userLogin = {
+  "loginWithUsernameAndPassword" : function(email, password, context, callback) {
+    var url = [NSURL URLWithString:Library.server.apiProduction + "/api/sketch/signin"];
+
+    var request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:"POST"];
+    [request setValue:"application/json" forHTTPHeaderField:"Content-Type"];
+    
+    var tmp = [[NSDictionary alloc] initWithObjectsAndKeys:email, @"email", password, @"password", nil];
+    var error = nil;
+    var postData = [NSJSONSerialization dataWithJSONObject:tmp options:0 error:error];
+
+    [request setHTTPBody:postData];
+
+    var response = nil;
+    var error = nil;
+    var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+      if (error == nil && data != nil){
+        var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+
+      if ([[res valueForKey:@"success"] boolValue]) {
+        [[NSUserDefaults standardUserDefaults] setObject:res.token forKey:"token"];
+        [[NSUserDefaults standardUserDefaults] setObject:res.user forKey:"user"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+          
+        [[NSApplication sharedApplication] displayDialog:"Import your artboards to project, go to plugins > Tster > Import Artboards" withTitle:"You are now logged in."];
+
+        callback(true);
+      } else {
+        [[NSApplication sharedApplication] displayDialog:"Verify your login and email." withTitle:"Login error."];
+        
+        callback(false);
+      }
+    } else {
+      Library.error.alert(context, data);
+    }
+  }
+}

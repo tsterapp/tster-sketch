@@ -1,0 +1,82 @@
+var Artboards = {
+  "readArtboards" : function(context, callback){
+    var token = [[NSUserDefaults standardUserDefaults] objectForKey:"token"];
+    var user = [[NSUserDefaults standardUserDefaults] objectForKey:"user"];
+    var url = [NSURL URLWithString:Library.server.apiProduction + "/api/sketch/projects/" + [user valueForKey:@"_id"]];
+
+    var request = [NSMutableURLRequest requestWithURL:url];
+    [request setHTTPMethod:"GET"];
+    [request setValue:"application/json" forHTTPHeaderField:"Content-Type"];
+    [request setValue:token forHTTPHeaderField:"x-access-token"];
+
+    var response = nil;
+    var error = nil;
+    var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+    if (error == nil && data != nil){ 
+      var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
+
+      if ([[res valueForKey:@"success"] boolValue]) {
+        callback([[[res valueForKey:@"projects"] reverseObjectEnumerator] allObjects]);
+      }
+
+    } else {
+      Library.error.alert(context, data);
+    }
+  },
+  "createArtboards" : function(context, data){
+    var doc = context.document;       
+    var plugin = context.plugin;
+    var project = data["project"];
+    var page = [doc addBlankPage];
+    var pages = [NSArray arrayWithArray:data["pages"]];
+    var artboard_size = Library.util.sizeMobileFromName(project["tipo"]);
+    var artboards = [[NSMutableArray alloc] init];
+    var x = 0, y = 0, spaceRow = 30, spaceColumn = 30, numberRows = 3;
+
+    General.doc = doc;
+    General.plugin = plugin;
+    General.page = page;
+    General.icons_awesome = Library.getJsonWithSource([plugin urlForResourceNamed:"icons_awesome.json"]);
+    General.icons_ionic = Library.getJsonWithSource([plugin urlForResourceNamed:"icons_ionic.json"]);
+    General.icons_material = Library.getJsonWithSource([plugin urlForResourceNamed:"icons_material.json"]);
+    General.artboard_width = artboard_size[0];
+    General.artboard_height = artboard_size[1];
+    General.mobile = project["tipo"];
+
+    Table.tables = data["tables"];
+    TabBar.tabbars = data["tabbars"];
+    Picker.pickers = data["pickers"];
+    ActionSheet.actionsheets = data["actionsheets"];
+    Segmented.segmenteds = data["segmenteds"];
+    AlertView.alertviews = data["alertviews"];
+
+    Styles.sharedLayerStyles = General.doc.documentData().layerStyles();
+    Styles.sharedTextStyles = General.doc.documentData().layerTextStyles();
+    Styles.sharedSymbolStyles = General.doc.documentData().layerSymbols();
+    Styles.builds();
+    Styles.text(page);
+
+    for (var i = 0; i < [pages count]; i++) {
+
+      if (i != 0 && i % numberRows == 0) {
+        x = 0;
+        y += artboard_size[1] + spaceColumn;
+      } else if (i != 0) {
+        x += artboard_size[0] + spaceRow;
+      };
+
+      var rect = MSRect.rectWithRect(NSMakeRect(x, y, General.artboard_width, General.artboard_height));
+      var artboard = Artboard.createArtboard(rect, pages[i]);
+      
+      [artboards addObject:artboard];
+    }
+
+    page.removeLayer(Styles.groupStyles);
+    page.addLayers([[[artboards copy] reverseObjectEnumerator] allObjects]);
+
+    var rect = artboards.count() > 1 ? artboards[1].rect() : artboards[0].rect();
+
+    [[doc currentView] centerRect:rect];
+  }
+}

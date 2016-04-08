@@ -1,0 +1,11 @@
+var General = {
+  "doc": null,
+  "page": null,
+  "plugin": null,
+  "icons_awesome": [],
+  "icons_ionic": [],
+  "icons_material": [],
+  "artboard_width" : 0,
+  "artboard_height" : 0,
+  "mobile": ""
+}

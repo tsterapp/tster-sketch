@@ -1,0 +1,33 @@
+var StatusBar = {
+  icons : [],
+  "addStatus": function(artboard){
+    var images = ["bar-left", "bar-center", "bar-right"];
+    var group = Library.addLayerGroup(artboard, {"name" : "Status Bar"})
+
+    for (var i = 0; i < images.length; i++) {
+      var source = General.plugin.urlForResourceNamed("icons_statusbar/"+ images[i] +".png");
+
+      if (i == 0) {
+        this.buildLeft(Library.addImageLayer(group, General.page, {url: source, name: images[i]}, false));
+      } else if (i == 1) {
+        this.buildCenter(Library.addImageLayer(group, General.page, {url: source, name: images[i]}, false), General.artboard_width);
+      } else if (i == 2){
+        this.buildRight(Library.addImageLayer(group, General.page, {url: source, name: images[i]}, false), General.artboard_width);
+      }
+    };
+    
+    group.resizeToFitChildrenWithOption(0);
+    Styles.statusbar(group);
+  },
+  "buildLeft": function(layer){
+    var frame = [layer frame];
+    [frame setX:5];
+  },
+  "buildCenter": function(layer){
+    Library.util.centerLayer(layer, CGPointMake(General.artboard_width / 2, 10));
+  },
+  "buildRight": function(layer){
+    var frame = [layer frame];
+    [frame setX:General.artboard_width - 34.5];
+  }
+}

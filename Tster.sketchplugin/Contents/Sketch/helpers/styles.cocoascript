@@ -1,0 +1,241 @@
+var Styles = {
+  sharedLayerStyles : null,
+  sharedTextStyles : null,
+  sharedSymbolStyles : null,
+  lineStyle : null,
+  statusBarStyle : null,
+  searchBarStyle : null,
+  tabBarsStyle : [],
+  navBarsStyle : [],
+  groupStyles : null,
+  switchStyle : null,
+  sliderStyle : null,
+  segmentedStyles: [],
+  "builds" : function(){
+    this.clear(this.sharedLayerStyles);
+    this.clear(this.sharedTextStyles);
+    this.clear(this.sharedSymbolStyles);
+
+    this.lines();
+    this.search();
+  },
+  "statusbar" : function(group){
+    if (this.statusBarStyle == null) {
+      this.statusBarStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Status Bar", group);
+    } else {
+      this.statusBarStyle.registerInstance(group);
+    }
+  },
+  "navbar" : {
+    navigationBarStyles : [],
+    textNavigationStyles : [],
+    buttonNavigationStyles : [],
+
+    colors : function(colors){
+      for (var i = 0; i < colors.count(); i++) {
+        var color_object = colors[i];
+
+        if (color_object["title"] == "Title Color" && !this.titleColor(color_object["color"])) {
+          this.createBar(color_object);
+        } else if (color_object["title"] == "Buttons Color" && !this.buttonsColor(color_object["color"])) {
+          this.createTitle(color_object);
+        } else if (color_object["title"] == "Bar Color" && !this.barColor(color_object["color"])) {
+          this.createButtons(color_object);
+        }
+      };
+    },
+    createBar : function(color_object) {
+      var name = "Navigation Title " + this.textNavigationStyles.length;
+      var color = Library.util.colorFromString(color_object["color"]);
+      var text = Library.addTextLayer(Styles.groupStyles, {"name" : name, "color": color, "fontSize": 17})
+      text.setFontPostscriptName("SF UI Display Medium");
+
+      var sharedStyle = Styles.sharedTextStyles.addSharedStyleWithName_firstInstance(name, text.style());
+
+      this.textNavigationStyles.push({"color": color_object["color"], "style": sharedStyle});
+    },
+    createTitle : function(color_object) {
+      var name = "Navigation Buttons " + this.buttonNavigationStyles.length;
+      var color = Library.util.colorFromString(color_object["color"]);
+      var text = Library.addTextLayer(Styles.groupStyles, {"name" : name, "color": color, "fontSize": 17})
+      var sharedStyle = Styles.sharedTextStyles.addSharedStyleWithName_firstInstance(name, text.style());
+
+      this.buttonNavigationStyles.push({"color": color_object["color"], "style": sharedStyle});
+    },
+    createButtons : function(color_object) {
+      var color = Library.util.colorTranslucentFromString(color_object["color"]);
+      var style = Styles.util.createStyleWithFill(color);
+
+      var shadow = style.shadows().addNewStylePart();
+      shadow.blurRadius = 0;
+      shadow.offsetY = 0.5;
+      shadow.color = MSColor.colorWithSVGString("#B2B2B2");
+
+      var sharedStyle = Styles.sharedLayerStyles.addSharedStyleWithName_firstInstance("Navigation Bar " + this.navigationBarStyles.length, style);
+
+      this.navigationBarStyles.push({"color": color_object["color"], "style": sharedStyle});
+    },
+    barColor : function(color) {
+      return Styles.util.findStyleInArrayWithColor(this.navigationBarStyles, color);
+    },
+    titleColor : function(color) {
+      return Styles.util.findStyleInArrayWithColor(this.textNavigationStyles, color);
+    },
+    buttonsColor : function(color) {
+      return Styles.util.findStyleInArrayWithColor(this.buttonNavigationStyles, color);
+    }
+  },
+  "tabbar" : {
+    barStyles : [],
+    iconsStyle : [],
+    colors: function(colors){
+      for (var i = 0; i < colors.count(); i++) {
+        var color_object = colors[i];
+
+        if (color_object["title"] == "Bar Color" && !this.barColor(color_object["color"])) {
+          this.createBar(color_object);
+        } else if (color_object["title"] == "Icons Unselected Color" && !this.iconsColor(color_object["color"])) {
+          this.createIcons(color_object);
+        }
+      };
+    },
+    createBar : function(color_object) {
+      var color = Library.util.colorFromString(color_object["color"]);
+      var style = Styles.util.createStyleWithFill(color);
+
+      var shadow = style.innerShadows().addNewStylePart();
+      shadow.blurRadius = 0;
+      shadow.offsetY = 0.5;
+      shadow.color = MSColor.colorWithSVGString("#B2B2B2");
+
+      var sharedStyle = Styles.sharedLayerStyles.addSharedStyleWithName_firstInstance("Tab Bar " + this.barStyles.length, style);
+
+      this.barStyles.push({"color": color_object["color"], "style": sharedStyle});
+    },
+    createIcons : function(color_object) {
+      var name = "Tabbar Buttons " + this.iconsStyle.length;
+      var color = Library.util.colorFromString(color_object["color"]);
+      var text = Library.addTextLayer(Styles.groupStyles, {"name" : name, "color": color, "fontSize": 12})
+      var sharedStyle = Styles.sharedTextStyles.addSharedStyleWithName_firstInstance(name, text.style());
+
+      this.iconsStyle.push({"color": color_object["color"], "style": sharedStyle});
+    },
+    barColor : function(color){
+      return Styles.util.findStyleInArrayWithColor(this.barStyles, color);
+    },
+    iconsColor : function(color) {
+      return Styles.util.findStyleInArrayWithColor(this.iconsStyle, color);
+    }
+  },
+  "tabbars" : function(_id, group){
+    var find = -1;
+
+    for (var i = 0; i < this.tabBarsStyle.length; i++) {
+      var tabBar = this.tabBarsStyle[i];
+
+      if (tabBar["_id"] === _id) {
+        find = tabBar;
+      }
+    }
+
+    if (find == -1) {
+      var symbol = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Tab Bar " + this.tabBarsStyle.length, group);
+      this.tabBarsStyle.push({"_id" : _id, "symbol" : symbol});
+    } else {
+      find["symbol"].registerInstance(group);
+    };
+  },
+  "slider" : function(group){
+    if (this.sliderStyle) {
+      this.sliderStyle.registerInstance(group);
+    } else {
+      this.sliderStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Slider", group);
+    }
+  },
+  "switch": function(group){
+    if (this.switchStyle) {
+      this.switchStyle.registerInstance(group);
+    } else {
+      this.switchStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Switch", group);
+    }
+  },
+  "segmented": function(group){
+    var name = "Segmented " + this.segmentedStyles.length;
+    
+    this.segmentedStyles.push(this.sharedSymbolStyles.addSymbolWithName_firstInstance(name, group));
+  },
+  "text" : function(page){
+    var group = Library.addLayerGroup(page, {"name" : "Styles"});
+
+    [group setIsVisible:![group isVisible]];
+    
+    this.groupStyles = group;
+  },
+  "search" : function(){
+    var searchBarStyle = MSStyle.alloc().init();
+
+    var fill = searchBarStyle.fills().addNewStylePart();
+    fill.color = MSColor.colorWithSVGString("#EBEBEB");
+
+    this.searchBarStyle = this.sharedLayerStyles.addSharedStyleWithName_firstInstance("Search Bar", searchBarStyle);
+  },
+  "lines" : function(){
+    var lineStyle = MSStyle.alloc().init();
+
+    var shadow = lineStyle.innerShadows().addNewStylePart();
+    shadow.blurRadius = 0;
+    shadow.offsetY = 1;
+    shadow.color = MSColor.colorWithSVGString("#C8C7CC");
+
+    this.lineStyle = this.sharedLayerStyles.addSharedStyleWithName_firstInstance("Line", lineStyle);
+  },
+  "clear" : function(styles){
+    while (styles.numberOfSharedObjects() > 0) {
+      for (var i = 0; i < styles.numberOfSharedObjects(); i++) {
+        var sharedObject = styles.sharedObjectAtIndex(i);
+
+        if (styles.removeSharedStyle) {
+          styles.removeSharedStyle(sharedObject);
+        } else if(styles.removeSymbol) {
+          styles.removeSymbol(sharedObject);
+        }
+      }
+    }
+  },
+  "util": {
+    "createStyleWithFill" : function(color) {
+      var style = MSStyle.alloc().init();
+
+      var fill = style.fills().addNewStylePart();
+      fill.color = color;
+
+      return style;
+    },
+    "findStyleInArrayWithColor" : function(array, color) {
+      var style;
+
+      for (var i = 0; i < array.length; i++) {
+        var object = array[i];
+
+        if (object["color"].isEqualToString(color)) {
+          style = object["style"];
+        };
+      };
+
+      return style;
+    },
+    "findObjectInArrayWithTitle" : function(array, title) {
+      var object_return;
+
+      for (var i = 0; i < array.count(); i++) {
+        var object = array[i];
+
+        if (object["title"].isEqualToString(title)) {
+          object_return = object;
+        };
+      };
+
+      return object_return;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+var Updates = {
+  "getNewestVersionNumber" : function() {
+    var app = [NSApplication sharedApplication];
+    var url = [NSURL URLWithString:"https://raw.githubusercontent.com/tsterapp/tster-sketch/master/Tster.sketchplugin/Contents/Sketch/manifest.json"];
+
+    var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30]
+    [request setHTTPMethod:"GET"]
+    
+    var response = nil;
+    var error = nil;
+    var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+    
+    if (error == nil && data != nil)
+    {     
+      var errorJson;
+      var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:errorJson]
+      
+      if(errorJson == nil){
+        if(res.version){
+          return res.version
+        }
+      } else {
+        return false
+      }
+    }
+  },
+  "isNewUpdate" : function(context, callback) {
+    var app = [NSApplication sharedApplication];
+    var newestVersion = this.getNewestVersionNumber(context)
+    var pluginVersion = manifest.getPluginVersion(context)
+
+    callback(newestVersion != pluginVersion);
+  }
+}

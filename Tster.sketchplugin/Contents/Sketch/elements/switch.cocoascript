@@ -1,0 +1,40 @@
+var Switch = {
+  "addSwitch" : function(group, rect){
+    var layerGroup = Library.addLayerGroup(group, {"name": "Switch"});
+    var layerBackground = Library.addRectangle(layerGroup, {"rect": CGRectMake(0, 0, 51, 31), "radius": 15.5, "color": MSColor.colorWithSVGString("#44DB5E")});
+    var centerBackground = Library.util.centerLayer(layerBackground, CGPointMake(rect.origin.x + (rect.size.width / 2), rect.origin.y + (rect.size.height / 2)));
+    var layerBall = Library.addRectangle(layerGroup, {"rect": CGRectMake(centerBackground.origin.x + 22, centerBackground.origin.y + 2, 28, 28), "radius": 100.0, "color": MSColor.colorWithSVGString("#FFFFFF")});
+
+    var border = [[[layerBall style] borders] addNewStylePart];
+    [border setColor:MSColor.colorWithRed_green_blue_alpha(0.0, 0.0, 0.0, 0.1)];
+    [border setThickness:0.5];
+    [border setPosition:2];
+
+    var shadow = [[[layerBall style] shadows] addNewStylePart];
+    shadow.offsetX       = 0;
+    shadow.offsetY       = 3;
+    shadow.blurRadius    = 1;
+    shadow.spread        = 0;
+    shadow.color         = MSColor.colorWithRed_green_blue_alpha(0.0, 0.0, 0.0, 0.05)];
+
+    var shadow = [[[layerBall style] shadows] addNewStylePart];
+    shadow.offsetX       = 0;
+    shadow.offsetY       = 2;
+    shadow.blurRadius    = 2;
+    shadow.spread        = 0;
+    shadow.color         = MSColor.colorWithRed_green_blue_alpha(0.0, 0.0, 0.0, 0.05)];
+
+    var shadow = [[[layerBall style] shadows] addNewStylePart];
+    shadow.offsetX       = 0;
+    shadow.offsetY       = 3;
+    shadow.blurRadius    = 3;
+    shadow.spread        = 0;
+    shadow.color         = MSColor.colorWithRed_green_blue_alpha(0.0, 0.0, 0.0, 0.05)];
+
+    layerGroup.resizeToFitChildrenWithOption(0);
+
+    Styles.switch(layerGroup);
+
+    return layerGroup;
+  }
+};

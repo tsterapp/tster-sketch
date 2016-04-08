@@ -1,0 +1,100 @@
+var Window = {
+  "projects": [],
+  "artboardsInterface" : function(context){
+    var app = [NSApplication sharedApplication];
+    var artboardWindow = [[NSWindow alloc] init];
+    [artboardWindow setFrame:NSMakeRect(0, 0, 540, 365) display:false];
+    [artboardWindow setBackgroundColor:NSColor.whiteColor()];
+
+    var scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(82, 91, 358, 165)];
+    scroll.hasVerticalScroller = false;
+    scroll.hasHorizontalScroller = false;
+    [[artboardWindow contentView] addSubview:scroll];
+
+    Window.artboardsScroll(context, artboardWindow, app, scroll);
+    
+    var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(225, 30, 92, 46)];
+
+    [cancelButton setTitle:"Cancel"];
+    [cancelButton setBezelStyle:NSRoundedBezelStyle];
+    [cancelButton setCOSJSTargetFunction:function(sender) {
+      [artboardWindow orderOut:nil];
+      [app stopModal];
+      [cancelButton setCOSJSTargetFunction:undefined];
+    }];
+    [cancelButton setAction:"callAction:"];
+    [[artboardWindow contentView] addSubview:cancelButton];
+
+    var bottomActionsView = [[NSView alloc] initWithFrame:NSMakeRect(90, 90, 350, 1)]
+    bottomActionsView.setWantsLayer(true)
+    [[artboardWindow contentView] addSubview:bottomActionsView]  
+      
+    var borderLayer = [CALayer layer]
+    borderLayer.frame = CGRectMake(0, 1, 350, 1)
+    [borderLayer setBackgroundColor:CGColorCreateGenericRGB(220/255, 220/255, 220/255, 1.0)]
+    [bottomActionsView setLayer:borderLayer]
+
+    var topActionsView = [[NSView alloc] initWithFrame:NSMakeRect(90, 255, 350, 1)]
+    topActionsView.setWantsLayer(true)
+    [[artboardWindow contentView] addSubview:topActionsView]  
+      
+    var borderLayer = [CALayer layer]
+    borderLayer.frame = CGRectMake(0, 1, 350, 1)
+    [borderLayer setBackgroundColor:CGColorCreateGenericRGB(220/255, 220/255, 220/255, 1.0)]
+    [topActionsView setLayer:borderLayer]
+
+    var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(82, 285, 127, 17)]
+    [titleField setEditable:false]
+    [titleField setBordered:false]
+    [titleField setAlignment:2] 
+    [titleField setDrawsBackground:false]
+    [titleField setFont:[NSFont boldSystemFontOfSize:14]];
+    [titleField setStringValue:"Import a project"]
+    [[artboardWindow contentView] addSubview:titleField]
+
+    [app runModalForWindow:artboardWindow];
+  },
+  "artboardsScroll" : function(context, window, app, scroll){
+    Artboards.readArtboards(context, function(projects){
+      var view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 358, 0)];
+
+      for (var i = 0; i < [projects count]; i++) {
+        var project = projects[i];
+
+        var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(5, (i * 40) + 17, 300, 20)]
+        [titleField setEditable:false]
+        [titleField setBordered:false]
+        [titleField setDrawsBackground:false]
+        [titleField setFont:[NSFont systemFontOfSize:14]];
+        [titleField setStringValue:[project valueForKeyPath:@"project.nome"]]; 
+        [view addSubview:titleField];
+
+        var exportButton = [[NSButton alloc] initWithFrame:NSMakeRect(266, (i * 40) + 3, 92, 46)];
+
+        [exportButton setTitle:"Import"];
+        [exportButton setTag:i];
+        [exportButton setBezelStyle:NSRoundedBezelStyle];
+        [exportButton setCOSJSTargetFunction:function(sender) {
+          [sender setCOSJSTargetFunction:undefined];
+          [window orderOut:nil];
+          [app stopModal];
+          
+          var project = projects[[sender tag]];
+          Artboards.createArtboards(context, project);
+        }];
+        [exportButton setAction:"callAction:"];
+        [view addSubview:exportButton];
+      };
+
+      var projects_minimum_distance = 91;
+      var projects_max_height = 165;
+      var projects_height = ([projects count] * 35) + 35;
+      var projects_distance = projects_height < projects_max_height ? (projects_max_height - projects_height) + projects_minimum_distance + 10 : projects_minimum_distance;
+
+      [view setFrame:NSMakeRect(0, 0, 358, projects_height)];
+      [scroll setFrame:NSMakeRect(82, projects_distance, 358, projects_height > projects_max_height ? projects_max_height : projects_height - 10)];
+      [scroll setDocumentView:view];
+      [[scroll documentView] scrollPoint:NSMakePoint(0, ([projects count] * 35) + 35)];
+    });
+  }
+};

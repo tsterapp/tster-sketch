@@ -1,0 +1,20 @@
+var Window = {
+  "supportInterface": function(context){
+    var app = [NSApplication sharedApplication]
+    var systemVersionDictionary = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"]
+    var systemVersion = [systemVersionDictionary objectForKey:@"ProductVersion"]
+    var pluginVersion = manifest.getPluginVersion(context)
+    var sketchVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]
+      
+    var subject = [NSString stringWithFormat:@"Report Plugin %@", pluginVersion];
+    var body = [NSString stringWithFormat:@"Describe your bug here: \n\n\n\n\n System Version: %@ \n Sketch Version: %@ \n", systemVersion, sketchVersion];
+    var to = @"support@tsterapp.com";
+    var encodedSubject = [NSString stringWithFormat:@"SUBJECT=%@", [subject stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    var encodedBody = [NSString stringWithFormat:@"BODY=%@", [body stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    var encodedTo = [to stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    var encodedURLString = [NSString stringWithFormat:@"mailto:%@?%@&%@", encodedTo, encodedSubject, encodedBody];
+    var mailtoURL = [NSURL URLWithString:encodedURLString];
+
+    [[NSWorkspace sharedWorkspace] openURL:mailtoURL];
+  }
+}

@@ -1,0 +1,358 @@
+var Library = {
+  //
+  // Get Icons
+  // valid types for source is 'text'
+  //
+  "getJsonWithSource": function(source) {
+    var icons_json = [NSData dataWithContentsOfFile: source];
+    var icons_parse = [NSJSONSerialization JSONObjectWithData:icons_json options:nil error:nil];
+    return icons_parse;
+  },
+  //
+  // Parse Hexcode to Unicode
+  // valid types for layer_text is 'text'
+  //
+  "parseHex": function(layer_text) {
+    var code = layer_text.charCodeAt(0);
+    var hex = code.toString(16);
+    while (hex.length < 4) {
+        hex = '0' + hex;
+    }
+    return hex;
+  },
+  //
+  "iconValues": function(icons) {
+    var list = [icons objectForKey:@"icons"];
+    var icons = [];
+    var names = [];
+
+    for (var i=0 ; i < [list count]; i++)
+    {
+      var hexcode = this.escapeUnicode('\\u' + list[i]["unicode"]);
+      var icon_name = list[i]["id"] + ' - fontawesome';
+      names.push(icon_name);
+      icons.push(hexcode);
+    }
+
+    return [icons, names];
+  },
+  //
+  // escape hexcode
+  //
+  //
+  "escapeUnicode": function(unicode) {
+    var r = /\\u([\d\w]{4})/gi;
+    x = unicode.replace(r, function (match, grp) {
+        return String.fromCharCode(parseInt(grp, 16)); }
+    );
+    return unescape(x);
+  },
+  //
+  // Search Unicode in Icon List
+  // valid types for unicode is 'text'
+  // valid types for icon_list is 'JSON'
+  //
+  "searchUnicode": function(unicode,icon_list) {
+    var result = [[NSObject alloc] init];
+    var list = [icon_list objectForKey:@"icons"];
+
+    for (var i=0 ; i < [list count]; i++)
+    {
+      if (list[i].unicode == unicode) {
+        result.alias = list[i]["id"];
+        result.unicode = list[i]["unicode"];
+      }
+    }
+
+    // if we had an icon id, show it in a window.
+    if (result.alias == "" || result.alias == undefined) {
+      this.components.alert('Select a fontawesome icon','It is not a font awesome icon. We did not find its name.');
+    }
+
+    return result;
+  },
+  //
+  //
+  //
+  //
+  //
+  "searchAlias": function(alias, icon_list) {
+    var result = [[NSObject alloc] init];
+    var list = [icon_list objectForKey:@"icons"];
+
+    for (var i=0 ; i < [list count]; i++)
+    {
+      if (list[i].id.isEqualToString(alias)) {
+        result.alias = list[i]["id"];
+        result.unicode = list[i]["unicode"];
+      }
+    }
+
+    return result;
+  },
+  //Adds a new rectangle to use radius, etc
+  "addRectangle" : function(container, parameters){
+    var rect = MSRectangleShape.alloc().init();
+    
+    if (typeof(parameters.name) !== 'undefined') rect.name = parameters.name;
+    if (typeof(parameters.rect) !== 'undefined') rect.rect = parameters.rect;
+    if (typeof(parameters.frame) !== 'undefined') rect.frame = parameters.frame;
+    if (typeof(parameters.radius) !== 'undefined') rect.cornerRadiusFloat = parameters.radius;
+    if (typeof(parameters.cornerComponents) !== 'undefined') rect.setCornerRadiusFromComponents(parameters.cornerComponents);
+
+    var shapeGroup = MSShapeGroup.shapeWithPath(rect);
+
+    if (typeof(parameters.alpha) !== 'undefined') this.util.setAlpha(shapeGroup, parameters.alpha);
+    if (typeof(parameters.color) !== 'undefined') { this.util.setFillColor(shapeGroup, parameters.color); }
+    if (typeof(parameters.colorBorder) !== 'undefined') { this.util.setBorderColor(shapeGroup, parameters.colorBorder, parameters.borderThickness); };
+
+    container.addLayers([shapeGroup]);
+
+    return shapeGroup;
+  },
+  // Adds a new layer as a child of `container` with the given type
+  // Valid types are 'group', 'text', 'image' and 'rectangle'
+  // parameters is an optional dictionary containing zero or more of the
+  // following keys:
+  //  name (a string)
+  //  rectangle (an NSRect)
+  //  color (an MSColor)
+  //  image (an MSImage)
+  // returns the newly created layer
+  "addLayer": function (container, type, parameters) {
+    var layer = container.addLayerOfType(type);
+    if (typeof(parameters.name) !== 'undefined') layer.name = parameters.name;
+    if (typeof(parameters.rect) !== 'undefined') layer.rect = parameters.rect;
+    if (typeof(parameters.frame) !== 'undefined') layer.frame = parameters.frame;
+    if (typeof(parameters.color) !== 'undefined') {
+      this.util.setFillColor(layer, parameters.color);
+    }
+    if (typeof(parameters.colorBorder) !== 'undefined') {
+      this.util.setBorderColor(layer, parameters.colorBorder, parameters.borderThickness);
+    };
+    return layer;
+  },
+  // Adds a new artboard as a child of `view` with the given type
+  // parameters is an optional dictionary containing zero or more of the
+  // following keys:
+  //  name (a string)
+  // returns the newly created artboard
+  "addArtboard": function(rect, parameters){
+    var artboard = MSArtboardGroup.new();
+  	artboard.frame = rect;
+    if (typeof(parameters.name) !== 'undefined') {
+      artboard.name = parameters.name;
+    };
+    return artboard;
+  },
+  // Adds a new group (MSLayerGroup) as a child of `container`
+  // See `addLayer` for a discussion of `parameters`
+  // returns the newly created group
+  "addLayerGroup": function (container, parameters) {
+    return this.addLayer(container, "group", parameters);
+  },
+  // Adds a new text layer (MSTextLayer) as a child of `container`
+  // In addition to the keys described in `addLayer`, `parameters` may also
+  // contain the following keys:
+  //  text (a string)
+  //  fontSize (a number)
+  // returns the newly created text layer
+  "addTextLayer": function (container, parameters) {
+    var textLayer = this.addLayer(container, "text", parameters);
+    if (typeof(parameters.text) !== 'undefined') {
+      textLayer.stringValue = parameters.text;
+      if (typeof(parameters.name) == 'undefined') {
+        textLayer.name = parameters.text;
+      }
+    }
+    if (typeof(parameters.fontSize) !== 'undefined') textLayer.fontSize = parameters.fontSize;
+    if (typeof(parameters.frame) === 'undefined') {
+      textLayer.adjustFrameToFit();
+    }
+
+    if (typeof(parameters.color) !== 'undefined') {
+      textLayer.textColor = parameters.color;
+    }
+
+    textLayer.setFontPostscriptName("SF UI Display Regular");
+
+    return textLayer;
+  },
+  "addImageLayer": function (container, page, parameters, scalable) {
+    var imageLayer = this.addLayer(container, "image", parameters);
+    var imageData = parameters.imageData;
+    var image = null;
+
+    if (typeof(imageData) === 'undefined') {
+      var image = parameters.image;
+
+      if (typeof(image) !== 'undefined') {
+        imageData = this.util.imageDataFromImage(container, image);
+      } else {
+        var url = parameters.url;
+
+        if (typeof(url) !== 'undefined' && url !== null) {
+          imageData = this.util.imageDataFromURL(page, url);
+        }
+        if (typeof(imageData) !== 'undefined') {
+          image = imageData.image();
+        }
+      }
+    }
+
+    if (typeof(image) !== 'undefined' && image !== null) {
+      var originalImageSize = [image size];
+      var scale = scalable ? 1.0 : 2.0;
+
+      originalImageSize.width = originalImageSize.width / scale;
+      originalImageSize.height = originalImageSize.height / scale;
+
+      var fill = [[[imageLayer style] fills] addNewStylePart];
+      [fill setIsEnabled:false];
+
+      [imageLayer setConstrainProportions:false];
+      [imageLayer setImage:imageData];
+      var rect = CGRectZero;
+      rect.size = originalImageSize;
+      [imageLayer setRect:rect];
+      [imageLayer setConstrainProportions:true];
+    }
+
+    return imageLayer;
+  },
+  "addLineLayer" : function(container, parameters){
+    var lineLayer = this.addLayer(container, "rectangle", parameters);
+    lineLayer.setStyle(Styles.lineStyle.newInstance());
+    return lineLayer;
+  },
+  "getImageWithUrl" : function(string){
+    var request = NSURLRequest.requestWithURL(NSURL.URLWithString(this.server.apiAmazon + string));
+    var response = NSURLConnection.sendSynchronousRequest_returningResponse_error(request, null, null);
+
+    return NSImage.alloc().initWithData(response);
+  },
+  "util": {
+    // Returns an MSImageData object for `image` (NSImage)
+    "imageDataFromImage": function(container, image) {
+      return [[MSImageData alloc] initWithImage:image convertColorSpace:false];
+    },
+
+    // Returns an MSImageData object for `url` (NSURL)
+    "imageDataFromURL": function(container, url) {
+      var image = [[NSImage alloc] initWithContentsOfURL:url];
+      var imageData = undefined;
+      if (typeof(image) !== 'undefined') {
+        imageData = this.imageDataFromImage(container, image);
+      }
+      return imageData;
+    },
+
+    // Centers `layer` at `point`. If point is not specified `layer`
+    // is centered at the origin (0,0)
+    "centerLayer": function(layer, point) {
+      var center = (typeof(point) !== 'undefined') ? point : CGPointMake(0,0);
+      var rect = [layer rect];
+      rect.origin.x = center.x-(CGRectGetWidth(rect)/2.0);
+      rect.origin.y = center.y-(CGRectGetHeight(rect)/2.0);
+      [layer setRect:rect];
+      return rect;
+    },
+
+    // Refresh 'layer'
+    "refreshTextLayer" : function(layer) {
+      [layer select: true byExpandingSelection: false];
+      [layer setIsEditingText: true];
+      [layer setIsEditingText: false];
+      [layer select: false byExpandingSelection: false];
+    },
+
+    // Sets the fill color for `layer` to `color` (MSColor)
+    "setFillColor": function(layer, color) {
+      var fill = [[[layer style] fills] addNewStylePart];
+      [fill setColor: color];
+    },
+    "setBorderColor": function(layer, color, tichkness) {
+      var border = [[[layer style] borders] addNewStylePart];
+      [border setColor:color];
+      [border setThickness:tichkness];
+      [border setPosition:1];
+    },
+    "setAlpha": function(layer, alpha) {
+      var context = [[layer style] contextSettings];
+      context.opacity = alpha;
+    },
+    "sizeMobileFromName": function(name){
+      if ([name isEqualToString:"iphone4"]) {
+        return [320, 480];
+      } else if ([name isEqualToString:"iphone5"]) {
+        return [320, 568];
+      } else if ([name isEqualToString:"iphone6"]) {
+        return [375, 667];
+      } else if ([name isEqualToString:"iphone6plus"]) {
+        return [414, 736];
+      } else {
+        return [320, 568];
+      }
+    },
+    "imageKeyboardFromMobile": function(name){
+      if ([name isEqualToString:"iphone4"]) {
+        return "keyboard_iphone5";
+      } else if ([name isEqualToString:"iphone5"]) {
+        return "keyboard_iphone5";
+      } else if ([name isEqualToString:"iphone6"]) {
+        return "keyboard_iphone6";
+      } else if ([name isEqualToString:"iphone6plus"]) {
+        return "keyboard_iphone6plus";
+      } else {
+        return "keyboard_iphone5";
+      }
+    },
+    "checkIfNull" : function(object) {
+      return typeof(object) !== 'undefined' && object && object != "";
+    },
+    "isRetinaDisplay" : function() {
+      return NSScreen.isOnRetinaScreen();
+    },
+    "colorFromString" : function(string) {
+      var parts = string.split(' ');
+      return MSColor.colorWithRed_green_blue_alpha(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3]));
+    },
+    "colorTranslucentFromString" : function(string) {
+      var parts = string.split(' ');
+      return MSColor.colorWithRed_green_blue_alpha(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]), 0.9);
+    },
+    "fontFromString" : function(string) {
+      if ([string rangeOfString:@"Bold"].length > 0) {
+        return "SF UI Display Bold";
+      } else if ([string rangeOfString:@"Italic"].length > 0){
+        return "SF UI Text Italic";
+      } else {
+        return "SF UI Display Regular";
+      }
+    },
+    "alignFromValue" : function(value) {
+      if (value == 0) {
+        return 0;
+      } else if (value == 1) {
+        return 2;
+      } else if (value == 2) {
+        return 1;
+      }
+    }
+  },
+  "server" : {
+    "apiProduction" : "http://tsterapp.com",
+    "apiAmazon" : "https://s3.amazonaws.com/tsterbucket/"
+  },
+  "error" : {
+    "alert": function(context, data) {
+      var stringRead = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];  
+      
+      var alert = [[NSAlert alloc] init]
+      [alert setMessageText:"Something went wrong..."]
+      [alert setInformativeText:"Please ensure your internet isn\'t down for connections to tsterapp.com."]
+
+      [alert addButtonWithTitle:'Close']
+    }
+  }
+};

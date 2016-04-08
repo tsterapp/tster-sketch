@@ -1,0 +1,173 @@
+var AlertView = {
+  alertviews : [],
+  bar_background_color : MSColor.colorWithRed_green_blue_alpha(0.501, 0.501, 0.501, 1),
+  bar_foreground_color : MSColor.colorWithRed_green_blue_alpha(1, 1, 1, 0.95),
+  title_color : MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 1),
+  subtitle_color : MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 1),
+  buttons_color : MSColor.colorWithRed_green_blue_alpha(0, 0.4784, 1, 1),
+  input_border_color : MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 0.1),
+  input_background_color : MSColor.colorWithRed_green_blue_alpha(1, 1, 1, 1),
+  modal_buttons_height : 44,
+  margin_vertical_inner: 15,
+  margin_horizontal_inner: 10,
+  input_height : 30,
+  input_horizontal_padding : 5,
+  input_text_color : MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 0.3),
+  buttons_font_size : 17,
+  "addAlertView" : function(container, geometric, idAlertView){
+    var alertview = this.find(idAlertView),
+        group = Library.addLayerGroup(container, {"name" : this.name(alertview)});
+
+    this.addBackgroundBar(group, geometric);
+
+    group.resizeToFitChildrenWithOption(0);
+
+    var title = this.addTitle(group, geometric, alertview);
+    var description = this.addDescription(group, geometric, alertview, [title frame].y() + [title frame].height());
+
+    if (alertview.type == 0) {
+      
+      this.addCenterButton(group, geometric, alertview);
+    } else if (alertview.type == 1) {
+
+      this.addLeftButton(group, geometric, alertview);
+      this.addRightButton(group, geometric, alertview);
+    } else if (alertview.type == 2) {
+
+      this.addInput(group, geometric, alertview, [description frame].y() + [description frame].height())
+
+      this.addLeftButton(group, geometric, alertview);
+      this.addRightButton(group, geometric, alertview);
+    }
+  },
+  "addTitle" : function(group, geometric, alertview){
+    var textLayer = Library.addTextLayer(group, {"text": alertview.title, "name": alertview.title, "fontSize": 17});
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: geometric["width"] - (this.margin_vertical_inner * 2) ];
+
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] / 2, 10 + (textFrame.height() / 2) + (this.margin_horizontal_inner / 2)));
+
+    textLayer.setFontPostscriptName("SF UI Display Medium");
+
+    return textLayer;
+  },
+  "addDescription" : function(group, geometric, alertview, horizontal_spacing){
+    var textLayer = Library.addTextLayer(group, {"text": alertview.subtitle, "name": alertview.subtitle, "fontSize": 13});
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setFontPostscriptName:"SF UI Display Regular"];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: geometric["width"] - (this.margin_vertical_inner * 2) ];
+
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] / 2, horizontal_spacing + (textFrame.height() / 2) + (this.margin_horizontal_inner / 2)));
+
+    return textLayer;
+  },
+  "addInput" : function(group, geometric, alertview, horizontal_spacing){
+    var rect = CGRectMake(0, 0, geometric["width"] - (this.margin_vertical_inner * 2), this.input_height);
+    var parameters = {rect : rect, color: this.input_background_color, cornerComponents: "4/4/4/4", colorBorder: this.input_border_color, borderThickness: 1};
+    var barLayer = Library.addRectangle(group, parameters);
+    var barFrame = [barLayer frame];
+
+    var textLayer = Library.addTextLayer(group, {"text": alertview.value, "name": alertview.value, "fontSize": 14, "color": this.input_text_color });
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+
+    [textFrame setWidth: geometric["width"] - (this.margin_vertical_inner * 2) - (this.input_horizontal_padding * 2) ];
+
+    Library.util.centerLayer(barLayer, CGPointMake(geometric["width"] / 2, horizontal_spacing + (barFrame.height() / 2) + this.margin_horizontal_inner));
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] / 2, horizontal_spacing + (barFrame.height() / 2) + this.margin_horizontal_inner));
+
+    return barLayer;
+  },
+  "addLeftButton" : function(group, geometric, alertview) {
+    var textLayer = Library.addTextLayer(group, {"text": alertview.buttons[1], "name": alertview.buttons[1], "fontSize": this.buttons_font_size, "color": this.buttons_color });
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: geometric["width"] / 2];
+
+    textLayer.setFontPostscriptName("SF UI Display Medium");
+
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] - (geometric["width"] / 4),  geometric["height"] - (this.modal_buttons_height / 2)));
+  },
+  "addRightButton" : function(group, geometric, alertview) {
+    var textLayer = Library.addTextLayer(group, {"text": alertview.buttons[0], "name": alertview.buttons[0], "fontSize": this.buttons_font_size, "color": this.buttons_color });
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: geometric["width"] / 2];
+
+    textLayer.setFontPostscriptName("SF UI Display Medium");
+
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] / 4,  geometric["height"] - (this.modal_buttons_height / 2)));
+  },
+  "addCenterButton" : function(group, geometric, alertview) {
+    var textLayer = Library.addTextLayer(group, {"text": alertview.buttons[0], "name": alertview.buttons[0], "fontSize": this.buttons_font_size, "color": this.buttons_color });
+    var textFrame = [textLayer frame];
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: geometric["width"]];
+
+    textLayer.setFontPostscriptName("SF UI Display Medium");
+
+    Library.util.centerLayer(textLayer, CGPointMake(geometric["width"] / 2,  geometric["height"] - (this.modal_buttons_height / 2)));
+  },
+  "addBackgroundBar" : function(group, geometric){
+    var rect = CGRectMake(geometric["x"], geometric["y"], geometric["width"], geometric["height"]);
+    var parameters = {rect : rect, color: MSColor.colorWithSVGString("#F6F8F9"), cornerComponents: "15/15/15/15"};
+    
+    Library.addRectangle(group, parameters);
+  },
+  "addTopBar" : function(group, geometric) {
+    var rect = CGRectMake(geometric["x"], geometric["y"], geometric["width"], geometric["height"] - this.modal_buttons_height);
+    var parameters = {rect : rect, color: this.bar_foreground_color, cornerComponents: "15/15/0/0"};
+    
+    Library.addRectangle(group, parameters);
+  },
+  "addBottomBar" : function(group, geometric){
+    var rect = CGRectMake(geometric["x"], (geometric["y"] + geometric["height"]) - this.modal_buttons_height, geometric["width"], this.modal_buttons_height);
+    var parameters = {rect : rect, color: this.bar_foreground_color, cornerComponents: "0/0/15/15"};
+    
+    Library.addRectangle(group, parameters);
+  },
+  "name" : function(alertview) {
+    if (alertview.type == 0) {
+      return "Alert View Pure";
+    } else if (alertview.type == 1) {
+      return "Alert View Decision";
+    } else if (alertview.type == 2) {
+      return "Alert View Input";
+    }
+  },
+  "find" : function(id){
+    var alertview = [[NSObject alloc] init];
+
+    for (var i = 0; i < this.alertviews.count(); i++) {
+      if (this.alertviews[i]["_id"].isEqualToString(id)) {
+        alertview = this.alertviews[i];
+      }
+    }
+    
+    return alertview;
+  }
+}

@@ -1,0 +1,89 @@
+var Picker = {
+  pickers : [],
+  label_height: 29,
+  label_font_size : 24,
+  label_limit : 7,
+  "addPicker" : function(container, geometric, idPicker){
+    var picker = this.find(idPicker),
+        itens = picker["itens"],
+        group = Library.addLayerGroup(container, {"name" : "Picker View"});
+
+    var group_frame = [group frame];
+
+    [group_frame setX:geometric["x"]];
+    [group_frame setY:geometric["y"]];
+    [group_frame setWidth:geometric["width"]];
+    [group_frame setHeight:geometric["height"]];
+
+    var itens_fit = parseInt(group_frame.height() / (this.label_font_size + this.label_limit));
+    var itens_limit = [itens count] < itens_fit ? [itens count] : itens_fit;
+
+    for (var i = 0; i < itens_limit; i++) {
+      var labelLayer = this.addLabel(group, itens[i], i);
+
+      if (itens_limit % 2 == 0 && (i + 1) == itens_limit / 2) {
+        labelLayer.textColor = MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 1);
+        
+        this.addLineUpCenter(group, labelLayer);
+        this.addLineDownCenter(group, labelLayer);
+      } else if (itens_limit % 2 != 0 && (i + 1) == parseInt(itens_limit / 2) + 1) {
+        labelLayer.textColor = MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 1);
+
+        this.addLineUpCenter(group, labelLayer);
+        this.addLineDownCenter(group, labelLayer);
+      } else {
+        labelLayer.textColor = MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 0.2);
+      }
+    };
+  },
+  "addLabel" : function(group, text, index){
+    var group_frame = [group frame],
+        group_width = group_frame.width(),
+        group_height = group_frame.height(),
+        textLayer = Library.addTextLayer(group, {"text": text, "name": text, "fontSize": this.label_font_size}),
+        textFrame = [textLayer frame]; 
+
+    [textLayer setHeightIsClipped:true];
+    [textLayer setTextBehaviour:1];
+    [textLayer setTextAlignment:2];
+
+    [textFrame setWidth: group_width];
+    [textFrame setHeight: this.label_height];
+    [textFrame setY:index * this.label_height + ((index + 1) * this.label_limit)];
+
+    return textLayer;
+  },
+  "addLineUpCenter" : function(group, labelLayer) {
+    var layer = Library.addLineLayer(group, {}),
+        group_frame = [group frame];
+
+    var rect = [layer rect];
+    rect.size.height = 1;
+    rect.size.width = group_frame.width();
+    rect.origin.x = 0;
+    rect.origin.y = [labelLayer frame].y() - (this.label_limit / 2);
+    [layer setRect:rect];
+  },
+  "addLineDownCenter" : function(group, labelLayer) {
+    var layer = Library.addLineLayer(group, {}),
+        group_frame = [group frame];
+
+    var rect = [layer rect];
+    rect.size.height = 1;
+    rect.size.width = group_frame.width();
+    rect.origin.x = 0;
+    rect.origin.y = [labelLayer frame].y() + this.label_height + (this.label_limit / 2);
+    [layer setRect:rect];
+  },
+  "find" : function(id){
+    var picker = [[NSObject alloc] init];
+    picker["itens"] = [NSArray arrayWithObject:""];
+
+    for (var i = 0; i < this.pickers.count(); i++) {
+      if (this.pickers[i]["_id"].isEqualToString(id)) {
+        picker = this.pickers[i];
+      }
+    }
+    return picker;
+  }
+}

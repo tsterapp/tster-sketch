@@ -1,0 +1,81 @@
+var ActionSheet = {
+  actionsheets : [],
+  margin : 8,
+  item_height : 57,
+  font_size : 20,
+  font_color : MSColor.colorWithRed_green_blue_alpha(0, 0.4784, 1, 1),
+  "addActionSheet" : function(container, geometric, idActionSheet){
+    var group = Library.addLayerGroup(container, {"name" : "Action Sheet"}),
+        actionsheet = this.find(idActionSheet),
+        itens = actionsheet["itens"];
+
+    var parametersBackground = {rect: CGRectMake(geometric["x"], geometric["y"], geometric["width"], geometric["height"]), color : MSColor.colorWithRed_green_blue_alpha(0, 0, 0, 0.4)},
+        layerBackground = Library.addLayer(group, "rectangle", parametersBackground);
+
+    for (var i = 0; i < [itens count]; i++) {
+      var item = itens[i],
+          layerGroup = Library.addLayerGroup(group, {"name" : "Item " + (i + 1)});
+
+      if (i == 0) {
+        this.buildItem(layerGroup, geometric, i, "13/13/13/13");
+      } else if (i == 1 && [itens count] == 2) {
+        this.buildItem(layerGroup, geometric, i, "13/13/13/13");
+      } else if (i == 1) {
+        this.buildItem(layerGroup, geometric, i, "0/0/13/13");
+      } else if (i == [itens count] - 1) {
+        this.buildItem(layerGroup, geometric, i, "13/13/0/0");
+      } else {
+        this.buildItem(layerGroup, geometric, i, "0/0/0/0");
+      }
+
+      layerGroup.resizeToFitChildrenWithOption(0);
+
+      var centerX = (geometric["width"] - (this.margin * 2)) / 2;
+      var centerY = this.item_height / 2;
+
+      if (i == 0) {
+        var label = this.addBoldLabel(layerGroup, item);
+      } else {
+        var label = this.addLabel(layerGroup, item);
+      }
+
+      Library.util.centerLayer(label, CGPointMake(centerX, centerY));
+    };
+
+    group.resizeToFitChildrenWithOption(0);
+  },
+  "buildItem" : function(group, geometric, index, corner){
+    var rect = CGRectMake(this.margin, (geometric["height"] - 10) - (this.item_height * (index + 1)) - (index > 0 ? 10 + (index * 1) : 0), geometric["width"] - (this.margin * 2), this.item_height);
+    var color = MSColor.colorWithRed_green_blue_alpha(1, 1, 1, 0.95);
+    var parameters = {rect : rect, color: color, cornerComponents: corner};
+    var layer = Library.addRectangle(group, parameters);
+
+  },
+  "addLabel" : function(group, object){
+    var text_name = object;
+    var textLayer = Library.addTextLayer(group, {"text": text_name, "name": text_name, "fontSize": this.font_size, "color": this.font_color});
+
+    textLayer.setFontPostscriptName("SF UI Display Regular");
+
+    return textLayer;
+  },
+  "addBoldLabel" : function(group, object) {
+    var text_name = object;
+    var textLayer = Library.addTextLayer(group, {"text": text_name, "name": text_name, "fontSize": this.font_size, "color": this.font_color});
+
+    textLayer.setFontPostscriptName("SF UI Display Bold");
+
+    return textLayer;
+  },
+  "find" : function(id){
+    var actionsheet = [[NSObject alloc] init];
+    actionsheet["itens"] = [NSArray arrayWithObject:""];
+
+    for (var i = 0; i < this.actionsheets.count(); i++) {
+      if (this.actionsheets[i]["_id"].isEqualToString(id)) {
+        actionsheet = this.actionsheets[i];
+      }
+    }
+    return actionsheet;
+  }
+}

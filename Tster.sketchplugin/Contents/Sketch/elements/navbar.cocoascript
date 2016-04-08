@@ -1,0 +1,198 @@
+var NavBar = {
+  icons : [],
+  navbar_height: 64,
+  searchbar_height : 30,
+  distance_to_bottom : 10,
+  "addNavBar" : function(object, artboard){
+    var group = Library.addLayerGroup(artboard, {"name" : "Navigation Bar"});
+
+    var bar = this.buildBar(group, General.artboard_width);
+    var barColor = Styles.util.findObjectInArrayWithTitle(object["colors"], "Bar Color");
+    var barStyle = Styles.navbar.barColor(barColor["color"]);
+    bar.setStyle(barStyle.newInstance());
+
+    var buttonsColor = Styles.util.findObjectInArrayWithTitle(object["colors"], "Buttons Color");
+    var buttonsStyle = Styles.navbar.buttonsColor(buttonsColor["color"]);
+
+    if (Library.util.checkIfNull(object["backItem"])) {
+      var layerLeft = this.buildLeft(group, buttonsColor["color"], object["backItem"]);
+      
+      if (object["backItem"]["title"] != "" || (object["backItem"]["image"] == "btvoltarnoborder" || object["backItem"]["image"] == "btvoltarnoborderen")) {
+        layerLeft.setStyle(buttonsStyle.newInstance());
+      }
+    }
+
+    if (Library.util.checkIfNull(object["rightItem"])) {
+      var layerRight = this.buildRight(group, buttonsColor["color"], object["rightItem"]);
+
+      if (object["rightItem"]["title"] != "") {
+        layerRight.setStyle(buttonsStyle.newInstance());
+      };
+    }
+
+    if (Library.util.checkIfNull(object["title"]["title"])) {
+      var layerCenter = this.buildCenter(group, object["title"]);
+      var titleColor = Styles.util.findObjectInArrayWithTitle(object["colors"], "Title Color");
+      var titleStyle = Styles.navbar.titleColor(titleColor["color"]);
+
+      layerCenter.setStyle(titleStyle.newInstance());
+    } else if (Library.util.checkIfNull(object["title"]["search"])) {
+      var layerCenter = this.buildSearch(group, layerRight, object["title"]);
+    }
+
+    group.resizeToFitChildrenWithOption(0);
+
+    var symbol = Styles.sharedSymbolStyles.addSymbolWithName_firstInstance("Navigation Bar " + Styles.navBarsStyle.length, group);
+    Styles.navBarsStyle.push({"symbol" : symbol});
+  },
+  "buildBar" : function(container){
+    var rect = NSMakeRect(0, 0, General.artboard_width, this.navbar_height),
+        params = {
+          "name": "Bar",
+          rect: rect
+        };
+
+    var layer = Library.addLayer(container, "rectangle", params);
+
+    return layer;
+  },
+  "buildLeft" : function(container, color, object){
+    if (object["image"] == "btvoltarnoborder" || object["image"] == "btvoltarnoborderen") {
+      var created_icon = Icons.createIcon([[NSString alloc] initWithString:"ion-chevron-left"]);
+          icon_layer = Library.addTextLayer(container, {"text": created_icon.icon, "name": created_icon.icon_name, "fontSize": 20, "color": Library.util.colorFromString(color)}),
+          icon_rect = [icon_layer rect];
+
+      icon_layer.setFontPostscriptName(created_icon.font);
+
+      icon_rect.origin.x = 10;
+      icon_rect.origin.y = (this.navbar_height / 2) - (CGRectGetHeight(icon_rect) / 2) + this.distance_to_bottom;
+
+      [icon_layer setRect:icon_rect];
+
+      var label_name = object["image"] == "btvoltarnoborder" ? "Voltar" : "Back";
+      var label_layer = Library.addTextLayer(container, {"text": label_name, "name": label_name, "fontSize": 17, "color": Library.util.colorFromString(color)}),
+          label_rect = [icon_layer rect];
+
+      label_rect.origin.x = 27;
+      label_rect.origin.y = (this.navbar_height / 2) - (CGRectGetHeight(label_rect) / 2) + this.distance_to_bottom;
+
+      [label_layer setRect:label_rect];
+
+      return label_layer;
+    } else {
+      var layer = this.buildCustomItem(container, color, object);
+        
+      if (layer) {
+        var rect = rect = [layer rect];
+
+        rect.origin.x = 10;
+        rect.origin.y = (this.navbar_height / 2) - (CGRectGetHeight(rect) / 2) + this.distance_to_bottom;
+
+        [layer setRect:rect];
+      };
+
+      return layer;
+    }
+  },
+  "buildCenter" : function(container, object){
+    var layer = this.buildCenterItem(container, object),
+        rect = [layer rect];
+
+    rect.origin.x = (General.artboard_width / 2) - (CGRectGetWidth(rect) / 2);
+    rect.origin.y = (this.navbar_height / 2) - (CGRectGetHeight(rect) / 2) + this.distance_to_bottom;
+
+    [layer setRect:rect];
+
+    return layer;
+  },
+  "buildRight" : function(container, color, object){
+    var layer = this.buildCustomItem(container, color, object);
+
+    if (layer) {
+      var rect = [layer rect];
+      
+      rect.origin.x = General.artboard_width - CGRectGetWidth(rect)  - 10;
+      rect.origin.y = (this.navbar_height / 2) - (CGRectGetHeight(rect) / 2) + this.distance_to_bottom;
+
+      [layer setRect:rect];
+    };
+
+    return layer;
+  },
+  "buildSearch" : function(container, layerRight, object){
+    var group = Library.addLayerGroup(container, {"name" : "SearchBar"}),
+        group_rect = [group rect];
+
+    group_rect.origin.x = 10;
+    group_rect.origin.y = 27;
+    group_rect.size.width = General.artboard_width - layerRight.rect().size.width - 40;
+    group_rect.size.height = this.searchbar_height;
+    [group setRect:group_rect];
+
+    var rectShape=MSRectangleShape.alloc().init();
+    rectShape.frame = MSRect.rectWithRect(NSMakeRect(0, 0, group_rect.size.width, group_rect.size.height));
+    rectShape.cornerRadiusFloat = 5;
+
+    var shapeGroup=MSShapeGroup.shapeWithPath(rectShape);
+    shapeGroup.setStyle(Styles.searchBarStyle.newInstance());
+    shapeGroup.name = "Search Bar";
+    shapeGroup.frame().constrainProportions = false;
+
+    group.addLayers([shapeGroup]);
+
+    var textLayer = Library.addTextLayer(group, {"text": object["search"], "name": object["search"], "fontSize": 14, "color": MSColor.colorWithSVGString("#BEBEC1")}),
+        text_rect = [textLayer rect];
+
+    text_rect.origin.y = ((CGRectGetHeight(group_rect) / 2) - (CGRectGetHeight(text_rect) / 2));
+    text_rect.origin.x = 35;
+
+    [textLayer setRect:text_rect];
+
+    var created_icon = Icons.createIcon([[NSString alloc] initWithString:@"ion-ios-search"]);
+    var textIconLayer = Library.addTextLayer(group, {"text": created_icon.icon, "name": "ion-search", "fontSize": 18, "color": MSColor.colorWithSVGString("#BEBEC1")}),
+        text_icon_rect = [textIconLayer rect];
+
+    text_icon_rect.origin.y = ((CGRectGetHeight(group_rect) / 2) - (CGRectGetHeight(text_icon_rect) / 2));
+    text_icon_rect.origin.x = 10;
+
+    [textIconLayer setRect:text_icon_rect];
+
+    textIconLayer.setFontPostscriptName(created_icon.font);
+
+    group.resizeToFitChildrenWithOption(0);
+
+    return shapeGroup;
+  },
+  "buildCenterItem" : function(container, object){
+    var layer;
+
+    layer = Library.addTextLayer(container, {"text": object["title"], "name": object["title"], "fontSize": 17});
+
+    return layer;
+  },
+  "buildCustomItem" : function(container, color, object){
+    var layer;
+
+    if (object["title"] != "") {
+      layer = Library.addTextLayer(container, {"text": object["title"], "name": object["title"], "fontSize": 17, "color": Library.util.colorFromString(color)});
+    } else if (object["image"] != "" && object["image"] != "navbarbuttonadditemone") {
+      var created_icon = Icons.createIcon(object["image"]);
+
+      layer = Library.addTextLayer(container, {"text": created_icon.icon, "name": created_icon.icon_name, "fontSize": 28, "color": Library.util.colorFromString(color)});
+      layer.setFontPostscriptName(created_icon.font);
+    }
+
+    return layer;
+  },
+  "fallbackColors" : function(object) {
+    if (object["colors"] == null) {
+      var mutable_object = [NSMutableDictionary dictionaryWithDictionary:object];
+      mutable_object["colors"] = [{"title": "Title Color", "color": "0 0 0 1"},
+                    {"title": "Buttons Color", "color": "0.160784 0.47451 1 1"},
+                    {"title": "Bar Color", "color": "0.960784 0.960784 0.960784 1"}];                   
+      return mutable_object.copy();
+    } else {
+      return object;
+    }
+  }
+}
