@@ -14,7 +14,7 @@
 
 <h4 align="center" >ATTENTION:</h4>
 
-<p align="center">To import all the icons available at Tster (Ionic, Material and Awasome) you must make the <a href="https://github.com/tsterapp/tster-sketch/archive/master.zip" target="_blank">download of the Icon Fonts zip</a>, unzip it and install at Fonts Book. You may have visualization problems if you do not follow these steps.</p>
+<p align="center">To import all the icons available at Tster (Ionic, Material and Awesome) you must make the <a href="https://github.com/tsterapp/tster-sketch/archive/master.zip" target="_blank">download of the Icon Fonts zip</a>, unzip it and install at Fonts Book. You may have visualization problems if you do not follow these steps.</p>
 
 <h4 align="center">(2) Log in Sketch Plugin using your account the Tster.</h4>
 
