@@ -90,6 +90,13 @@ var Library = {
 
     return result;
   },
+  "addSymbolWithGroup" : function(container, name){
+    var layers = [MSLayerArray arrayWithLayer:container];
+
+    if ([MSSymbolCreator canCreateSymbolFromLayers:layers]]) {
+      // return [MSSymbolCreator createSymbolFromLayers:layers withName:name onSymbolsPage:true];  
+    };
+  },
   //Adds a new rectangle to use radius, etc
   "addRectangle" : function(container, parameters){
     var rect = MSRectangleShape.alloc().init();
@@ -121,15 +128,19 @@ var Library = {
   // returns the newly created layer
   "addLayer": function (container, type, parameters) {
     var layer = container.addLayerOfType(type);
+
     if (typeof(parameters.name) !== 'undefined') layer.name = parameters.name;
     if (typeof(parameters.rect) !== 'undefined') layer.rect = parameters.rect;
     if (typeof(parameters.frame) !== 'undefined') layer.frame = parameters.frame;
+
     if (typeof(parameters.color) !== 'undefined') {
       this.util.setFillColor(layer, parameters.color);
     }
+
     if (typeof(parameters.colorBorder) !== 'undefined') {
       this.util.setBorderColor(layer, parameters.colorBorder, parameters.borderThickness);
     };
+
     return layer;
   },
   // Adds a new artboard as a child of `view` with the given type
@@ -139,10 +150,10 @@ var Library = {
   // returns the newly created artboard
   "addArtboard": function(rect, parameters){
     var artboard = MSArtboardGroup.new();
-  	artboard.frame = rect;
-    if (typeof(parameters.name) !== 'undefined') {
-      artboard.name = parameters.name;
-    };
+    
+    if (typeof(rect) !== 'undefined') artboard.frame = rect;
+    if (typeof(parameters.name) !== 'undefined') artboard.name = parameters.name;
+
     return artboard;
   },
   // Adds a new group (MSLayerGroup) as a child of `container`
@@ -182,6 +193,8 @@ var Library = {
     var imageLayer = this.addLayer(container, "image", parameters);
     var imageData = parameters.imageData;
     var image = null;
+
+    log(imageLayer);
 
     if (typeof(imageData) === 'undefined') {
       var image = parameters.image;

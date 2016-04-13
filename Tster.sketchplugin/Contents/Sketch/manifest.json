@@ -1,7 +1,7 @@
 {
   "name" : "Tster",
   "description" : "Its a client plugin to use Tster Project in Sketch for developers and designers.",
-  "version" : "1.0.0",
+  "version" : "1.0.1",
   "commands" : [
     {
       "script" : "sign_user.cocoascript",

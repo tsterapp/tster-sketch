@@ -42,8 +42,8 @@ var NavBar = {
 
     group.resizeToFitChildrenWithOption(0);
 
-    var symbol = Styles.sharedSymbolStyles.addSymbolWithName_firstInstance("Navigation Bar " + Styles.navBarsStyle.length, group);
-    Styles.navBarsStyle.push({"symbol" : symbol});
+    // var symbol = Styles.sharedSymbolStyles.addSymbolWithName_firstInstance("Navigation Bar " + Styles.navBarsStyle.length, group);
+    // Styles.navBarsStyle.push({"symbol" : symbol});
   },
   "buildBar" : function(container){
     var rect = NSMakeRect(0, 0, General.artboard_width, this.navbar_height),

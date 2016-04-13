@@ -51,11 +51,14 @@ var Artboards = {
     Segmented.segmenteds = data["segmenteds"];
     AlertView.alertviews = data["alertviews"];
 
+    var test = [[MSSymbolCreator alloc] init];
+
+    Styles.page = page;
     Styles.sharedLayerStyles = General.doc.documentData().layerStyles();
     Styles.sharedTextStyles = General.doc.documentData().layerTextStyles();
     Styles.sharedSymbolStyles = General.doc.documentData().layerSymbols();
     Styles.builds();
-    Styles.text(page);
+    Styles.text();
 
     for (var i = 0; i < [pages count]; i++) {
 

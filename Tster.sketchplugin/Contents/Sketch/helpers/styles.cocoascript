@@ -10,6 +10,7 @@ var Styles = {
   groupStyles : null,
   switchStyle : null,
   sliderStyle : null,
+  page : null,
   segmentedStyles: [],
   "builds" : function(){
     this.clear(this.sharedLayerStyles);
@@ -18,13 +19,6 @@ var Styles = {
 
     this.lines();
     this.search();
-  },
-  "statusbar" : function(group){
-    if (this.statusBarStyle == null) {
-      this.statusBarStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Status Bar", group);
-    } else {
-      this.statusBarStyle.registerInstance(group);
-    }
   },
   "navbar" : {
     navigationBarStyles : [],
@@ -139,33 +133,35 @@ var Styles = {
     }
 
     if (find == -1) {
-      var symbol = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Tab Bar " + this.tabBarsStyle.length, group);
-      this.tabBarsStyle.push({"_id" : _id, "symbol" : symbol});
+      var name = "Tab Bar " + this.tabBarsStyle.length;
+      // var symbol = Library.addSymbolWithGroup(group, name, this.page);
+
+      // this.tabBarsStyle.push({"_id" : _id, "symbol" : symbol});
     } else {
-      find["symbol"].registerInstance(group);
+      // find["symbol"].registerInstance(group);
     };
   },
   "slider" : function(group){
     if (this.sliderStyle) {
-      this.sliderStyle.registerInstance(group);
+      // this.sliderStyle.registerInstance(group);
     } else {
-      this.sliderStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Slider", group);
+      // this.sliderStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Slider", group);
     }
   },
   "switch": function(group){
     if (this.switchStyle) {
-      this.switchStyle.registerInstance(group);
+      // this.switchStyle.registerInstance(group);
     } else {
-      this.switchStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Switch", group);
+      // this.switchStyle = this.sharedSymbolStyles.addSymbolWithName_firstInstance("Switch", group);
     }
   },
   "segmented": function(group){
     var name = "Segmented " + this.segmentedStyles.length;
     
-    this.segmentedStyles.push(this.sharedSymbolStyles.addSymbolWithName_firstInstance(name, group));
+    // this.segmentedStyles.push(this.sharedSymbolStyles.addSymbolWithName_firstInstance(name, group));
   },
   "text" : function(page){
-    var group = Library.addLayerGroup(page, {"name" : "Styles"});
+    var group = Library.addLayerGroup(this.page, {"name" : "Styles"});
 
     [group setIsVisible:![group isVisible]];
     
