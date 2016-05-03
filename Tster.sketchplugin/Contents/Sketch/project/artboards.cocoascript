@@ -18,6 +18,8 @@ var Artboards = {
 
       if ([[res valueForKey:@"success"] boolValue]) {
         callback([[[res valueForKey:@"projects"] reverseObjectEnumerator] allObjects]);
+      } else {
+        [[NSApplication sharedApplication] displayDialog:"Get the app and sign up. If you have any questions about this, contact support@tsterapp.com. We look forward to answering your questions :)" withTitle:"I'm sorry! Sketch Plugin is available for users plus."];
       }
 
     } else {
