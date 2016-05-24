@@ -60,7 +60,7 @@ var Styles = {
       var color = Library.util.colorTranslucentFromString(color_object["color"]);
       var style = Styles.util.createStyleWithFill(color);
 
-      var shadow = style.shadows().addNewStylePart();
+      var shadow = style.addStylePartOfType(2);
       shadow.blurRadius = 0;
       shadow.offsetY = 0.5;
       shadow.color = MSColor.colorWithSVGString("#B2B2B2");
@@ -97,7 +97,7 @@ var Styles = {
       var color = Library.util.colorFromString(color_object["color"]);
       var style = Styles.util.createStyleWithFill(color);
 
-      var shadow = style.innerShadows().addNewStylePart();
+      var shadow = style.addStylePartOfType(3);
       shadow.blurRadius = 0;
       shadow.offsetY = 0.5;
       shadow.color = MSColor.colorWithSVGString("#B2B2B2");
@@ -170,7 +170,7 @@ var Styles = {
   "search" : function(){
     var searchBarStyle = MSStyle.alloc().init();
 
-    var fill = searchBarStyle.fills().addNewStylePart();
+    var fill = searchBarStyle.addStylePartOfType(0);
     fill.color = MSColor.colorWithSVGString("#EBEBEB");
 
     this.searchBarStyle = this.sharedLayerStyles.addSharedStyleWithName_firstInstance("Search Bar", searchBarStyle);
@@ -178,7 +178,7 @@ var Styles = {
   "lines" : function(){
     var lineStyle = MSStyle.alloc().init();
 
-    var shadow = lineStyle.innerShadows().addNewStylePart();
+    var shadow = lineStyle.addStylePartOfType(3);
     shadow.blurRadius = 0;
     shadow.offsetY = 1;
     shadow.color = MSColor.colorWithSVGString("#C8C7CC");
@@ -202,7 +202,7 @@ var Styles = {
     "createStyleWithFill" : function(color) {
       var style = MSStyle.alloc().init();
 
-      var fill = style.fills().addNewStylePart();
+      var fill = style.addStylePartOfType(0);
       fill.color = color;
 
       return style;

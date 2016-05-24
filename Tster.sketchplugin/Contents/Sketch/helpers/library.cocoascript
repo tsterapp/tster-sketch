@@ -220,7 +220,7 @@ var Library = {
       originalImageSize.width = originalImageSize.width / scale;
       originalImageSize.height = originalImageSize.height / scale;
 
-      var fill = [[[imageLayer style] fills] addNewStylePart];
+      var fill = [[imageLayer style] addStylePartOfType:0];
       [fill setIsEnabled:false];
 
       [imageLayer setConstrainProportions:false];
@@ -281,11 +281,11 @@ var Library = {
 
     // Sets the fill color for `layer` to `color` (MSColor)
     "setFillColor": function(layer, color) {
-      var fill = [[[layer style] fills] addNewStylePart];
+      var fill = [[layer style] addStylePartOfType:0];
       [fill setColor: color];
     },
     "setBorderColor": function(layer, color, tichkness) {
-      var border = [[[layer style] borders] addNewStylePart];
+      var border = [[layer style] addStylePartOfType:1];
       [border setColor:color];
       [border setThickness:tichkness];
       [border setPosition:1];
